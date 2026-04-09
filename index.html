@@ -13,33 +13,31 @@
         .active-screen { display: flex; }
 
         #start-frame { background: rgba(0, 0, 0, 0.8); padding: 40px; border-radius: 20px; text-align: center; border: 2px solid #27ae60; }
-        .settings-row h2 { margin-top: 20px; color: #f1c40f; }
         .settings-row button { background: #34495e; color: white; border: 2px solid #7f8c8d; padding: 12px 25px; font-size: 20px; border-radius: 8px; cursor: pointer; margin: 8px; transition: 0.3s; }
         .settings-row button.selected { background: #e67e22; border-color: white; transform: scale(1.1); }
         #start-btn { background: #27ae60; padding: 15px 40px; font-size: 24px; margin-top: 30px; border-radius: 10px; cursor: pointer; color: white; border: none; font-weight: bold; }
 
-        #setup-info { background: #c0392b; padding: 15px 30px; border-radius: 10px; font-size: 22px; margin-bottom: 20px; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.3); text-align: center; width: 90%; }
+        #setup-info { background: #c0392b; padding: 15px 30px; border-radius: 10px; font-size: 22px; margin-bottom: 20px; font-weight: bold; width: 90%; text-align: center; }
 
         .game-container { display: flex; justify-content: space-between; width: 100%; gap: 40px; }
-        .team-section { flex: 1; text-align: center; background: rgba(0,0,0,0.2); padding: 20px; border-radius: 15px; border: 2px solid transparent; transition: 0.3s; }
-        .active-team-border { border-color: #f1c40f; background: rgba(0,0,0,0.4); }
+        .team-section { flex: 1; text-align: center; background: rgba(0,0,0,0.2); padding: 20px; border-radius: 15px; border: 2px solid transparent; transition: 0.4s; position: relative; }
+        
+        /* Blur Efekti */
+        .blur-team { filter: blur(15px); pointer-events: none; opacity: 0.4; }
+        .active-team-border { border-color: #f1c40f; background: rgba(0,0,0,0.4); transform: scale(1.02); }
         
         .bottle-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 20px 0; }
-        
-        .bottle { background: #b30000; color: white; font-size: 22px; padding: 15px 0; border: none; cursor: pointer; border-radius: 5px; box-shadow: 0 4px 0 #7b0000; }
-        .bottle.selected-poison { background: #27ae60; border: 3px solid white; box-shadow: 0 4px 0 #1e7e45; } 
-        .bottle.safe-clicked { background: #3498db; cursor: not-allowed; box-shadow: 0 4px 0 #217dbb; } 
-        .bottle.poison-clicked { background: #f1c40f; color: black; font-weight: bold; cursor: not-allowed; box-shadow: 0 4px 0 #c29d0b; } 
+        .bottle { background: #b30000; color: white; font-size: 22px; padding: 15px 0; border: none; cursor: pointer; border-radius: 5px; box-shadow: 0 4px 0 #7b0000; transition: 0.2s; }
+        .bottle.selected-poison { background: #27ae60; border: 2px solid white; }
+        .bottle.safe-clicked { background: #3498db; cursor: not-allowed; }
+        .bottle.poison-clicked { background: #f1c40f; color: black; font-weight: bold; cursor: not-allowed; }
 
-        .confirm-btn { background: #27ae60; color: white; font-size: 22px; padding: 12px; width: 100%; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .confirm-btn { background: #27ae60; color: white; font-size: 20px; padding: 12px; width: 100%; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
         .confirm-btn:disabled { background: #7f8c8d; cursor: not-allowed; opacity: 0.5; }
 
-        #question-frame, .overlay-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 100; }
-        #question-text { background: #2c3e50; padding: 30px; border-radius: 15px; margin-bottom: 20px; border: 2px solid #3498db; max-width: 600px; text-align: center; }
+        #question-frame, .overlay-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 2000; }
         .options { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 80%; max-width: 500px; }
         .options button { padding: 20px; font-size: 24px; border-radius: 10px; border: none; cursor: pointer; background: #3498db; color: white; font-weight: bold; }
-
-        .restart-btn { background: #27ae60; padding: 15px 40px; font-size: 22px; color: white; border: none; border-radius: 10px; cursor: pointer; margin-top: 30px; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -47,60 +45,55 @@
     <div id="credits">Mertcan Koca 10/B Matematik Proje Ödevi</div>
 
     <div id="start-frame" class="screen active-screen">
-        <h1 style="font-size: 45px; margin-bottom: 5px; color: #f1c40f;">Matematik Şişe Düellosu</h1>
-        <p style="font-size: 18px; margin-bottom: 30px;">Zehirleri stratejik yerleştir, rakibini ele!</p>
-        
+        <h1 style="color: #f1c40f; font-size: 45px; margin-bottom: 5px;">Matematik Şişe Düellosu</h1>
         <div class="settings-row">
-            <h2>Zehirli Şişe Sayısı</h2>
+            <h2>Zehir Sayısı</h2>
             <button onclick="setAmount(5, this)">5</button>
             <button onclick="setAmount(10, this)">10</button>
             <button onclick="setAmount(15, this)">15</button>
         </div>
         <div class="settings-row">
-            <h2>Soru Süresi (Saniye)</h2>
-            <button onclick="setTime(30, this)">30</button>
-            <button onclick="setTime(45, this)">45</button>
-            <button onclick="setTime(60, this)">60</button>
+            <h2>Soru Süresi</h2>
+            <button onclick="setTime(30, this)">30s</button>
+            <button onclick="setTime(45, this)">45s</button>
+            <button onclick="setTime(60, this)">60s</button>
         </div>
         <button id="start-btn" onclick="initSetup()">KURULUMA BAŞLA</button>
     </div>
 
     <div id="main-game-frame" class="screen">
         <div id="setup-info">YÜKLENİYOR...</div>
-        
         <div class="game-container">
             <div id="t1-sec" class="team-section">
-                <h2 style="font-size: 28px;">1. TAKIM</h2>
+                <h2>1. TAKIM</h2>
                 <div class="bottle-grid" id="grid-t1"></div>
-                <button id="btn-conf-1" class="confirm-btn" onclick="finishTeamSetup(1)">ONAYLA</button>
+                <button id="btn-conf-1" class="confirm-btn" onclick="nextSetupStep()">SEÇİMLERİ ONAYLA</button>
             </div>
-
             <div id="t2-sec" class="team-section">
-                <h2 style="font-size: 28px;">2. TAKIM</h2>
+                <h2>2. TAKIM</h2>
                 <div class="bottle-grid" id="grid-t2"></div>
-                <button id="btn-conf-2" class="confirm-btn" onclick="finishTeamSetup(2)">ONAYLA</button>
+                <button id="btn-conf-2" class="confirm-btn" onclick="nextSetupStep()">SEÇİMLERİ ONAYLA</button>
             </div>
         </div>
     </div>
 
     <div id="question-frame">
-        <div style="font-size: 20px; color: #f1c40f; margin-bottom: 10px;">KALAN SÜRE</div>
-        <h2 id="timer-text" style="font-size: 70px; color: #e74c3c; margin: 0 0 20px 0;">60</h2>
-        <div id="question-text" style="font-size: 28px;">Soru...</div>
+        <h2 id="timer-text" style="font-size: 80px; color: #e74c3c;">60</h2>
+        <div id="question-text" style="padding: 20px; font-size: 26px; text-align: center;">Soru...</div>
         <div class="options" id="options-container"></div>
     </div>
 
     <div id="end-frame" class="overlay-screen">
-        <h1 id="end-title" style="font-size: 60px; color: #e74c3c;">OYUN BİTTİ</h1>
+        <h1 id="end-title" style="font-size: 60px;">OYUN BİTTİ</h1>
         <p id="end-subtitle" style="font-size: 24px; margin-bottom: 20px;"></p>
-        <button class="restart-btn" onclick="location.reload()">TEKRAR OYNA</button>
+        <button style="padding: 15px 40px; font-size: 20px; cursor: pointer; border-radius: 10px;" onclick="location.reload()">TEKRAR OYNA</button>
     </div>
 
 <script>
     let maxPoison = 0, gameTime = 0;
-    let setupStage = 1; 
+    let setupStep = 1; // 1: T1 yerleştiriyor, 2: T2 yerleştiriyor, 3: Oyun
     let t1Bottles = [], t2Bottles = [];
-    let currentTurn = 1;
+    let currentTurn = 1; 
     let timerInterval, currentCorrectAnswer;
 
     function setAmount(v, btn) {
@@ -115,47 +108,53 @@
     }
 
     function initSetup() {
-        if(maxPoison === 0 || gameTime === 0) return alert("Seçimleri yapın!");
-        for(let i=1; i<=20; i++) {
+        if(!maxPoison || !gameTime) return alert("Seçimleri tamamlayın!");
+        for(let i=1; i<=20; i++){
             t1Bottles.push({id: i, isPoison: false, clicked: false});
             t2Bottles.push({id: i, isPoison: false, clicked: false});
         }
         document.getElementById('start-frame').classList.remove('active-screen');
         document.getElementById('main-game-frame').classList.add('active-screen');
-        updateSetupUI();
+        refreshUI();
     }
 
-    function updateSetupUI() {
+    function refreshUI() {
         const info = document.getElementById('setup-info');
-        const b1 = document.getElementById('btn-conf-1');
-        const b2 = document.getElementById('btn-conf-2');
+        const s1 = document.getElementById('t1-sec');
+        const s2 = document.getElementById('t2-sec');
 
-        if(setupStage === 1) {
-            info.innerText = "2. TAKIM BAKMASIN! 1. Takım rakibinin şişelerine zehir yerleştiriyor.";
-            b1.style.visibility = "hidden";
-            b2.style.visibility = "visible";
+        if(setupStep === 1) {
+            info.innerText = "2. TAKIM BAKMASIN! 1. Takım rakibi için zehir yerleştiriyor.";
+            s1.classList.add('blur-team');
+            s2.classList.remove('blur-team');
+            document.getElementById('btn-conf-1').style.display = "none";
+            document.getElementById('btn-conf-2').style.display = "block";
             renderGrid('grid-t2', t2Bottles, true);
             renderGrid('grid-t1', t1Bottles, false);
-        } else if(setupStage === 2) {
-            info.innerText = "1. TAKIM BAKMASIN! 2. Takım rakibinin şişelerine zehir yerleştiriyor.";
-            b2.style.visibility = "hidden";
-            b1.style.visibility = "visible";
+        } else if(setupStep === 2) {
+            info.innerText = "1. TAKIM BAKMASIN! 2. Takım rakibi için zehir yerleştiriyor.";
+            s2.classList.add('blur-team');
+            s1.classList.remove('blur-team');
+            document.getElementById('btn-conf-2').style.display = "none";
+            document.getElementById('btn-conf-1').style.display = "block";
             renderGrid('grid-t1', t1Bottles, true);
             renderGrid('grid-t2', t2Bottles, false);
         } else {
             info.style.background = "#2980b9";
             info.innerText = "OYUN BAŞLADI! SIRA: 1. TAKIM";
-            b1.style.display = "none"; b2.style.display = "none";
+            s1.classList.remove('blur-team'); s2.classList.remove('blur-team');
+            document.getElementById('btn-conf-1').style.display = "none";
+            document.getElementById('btn-conf-2').style.display = "none";
             renderGrid('grid-t1', t1Bottles, true);
             renderGrid('grid-t2', t2Bottles, true);
             updateTurnVisuals();
         }
-        checkConfirmStatus();
+        checkButtons();
     }
 
-    function updateTurnVisuals() {
-        document.getElementById('t1-sec').classList.toggle('active-team-border', currentTurn === 1);
-        document.getElementById('t2-sec').classList.toggle('active-team-border', currentTurn === 2);
+    function nextSetupStep() {
+        setupStep++;
+        refreshUI();
     }
 
     function renderGrid(containerId, data, clickable) {
@@ -165,50 +164,49 @@
             const btn = document.createElement('button');
             btn.className = 'bottle';
             btn.innerText = b.id;
-            if(setupStage < 3 && b.isPoison) btn.classList.add('selected-poison');
-            if(setupStage === 3 && b.clicked) {
-                btn.classList.add(b.isPoison ? 'poison-clicked' : 'safe-clicked');
-                btn.innerText = b.isPoison ? "ZEHİR" : "TEMİZ";
+
+            // Görünüm mantığı (Sadece yerleştiren görsün)
+            if(setupStep < 3) {
+                if(b.isPoison) btn.classList.add('selected-poison');
+            } else {
+                if(b.clicked) {
+                    btn.classList.add(b.isPoison ? 'poison-clicked' : 'safe-clicked');
+                    btn.innerText = b.isPoison ? "ZEHİR" : "TEMİZ";
+                }
             }
+
             if(clickable) btn.onclick = () => {
-                if(setupStage < 3) {
+                if(setupStep < 3) {
                     const count = data.filter(x => x.isPoison).length;
                     if(!b.isPoison && count < maxPoison) b.isPoison = true;
                     else if(b.isPoison) b.isPoison = false;
                     renderGrid(containerId, data, true);
-                    checkConfirmStatus();
-                } else handlePlayClick(b, data);
+                    checkButtons();
+                } else handlePlay(b, data);
             };
             grid.appendChild(btn);
         });
     }
 
-    function checkConfirmStatus() {
-        const count1 = t1Bottles.filter(x => x.isPoison).length;
-        const count2 = t2Bottles.filter(x => x.isPoison).length;
-        document.getElementById('btn-conf-1').disabled = (count1 !== maxPoison);
-        document.getElementById('btn-conf-2').disabled = (count2 !== maxPoison);
+    function checkButtons() {
+        const b1 = document.getElementById('btn-conf-1');
+        const b2 = document.getElementById('btn-conf-2');
+        b1.disabled = t1Bottles.filter(x => x.isPoison).length !== maxPoison;
+        b2.disabled = t2Bottles.filter(x => x.isPoison).length !== maxPoison;
     }
 
-    function finishTeamSetup() {
-        setupStage = setupStage === 1 ? 2 : 3;
-        updateSetupUI();
-    }
-
-    function handlePlayClick(bottle, dataset) {
-        const isTargetValid = (currentTurn === 1 && dataset === t2Bottles) || (currentTurn === 2 && dataset === t1Bottles);
-        if(!isTargetValid) return alert("Kendi panona dokunamazsın!");
+    function handlePlay(bottle, dataset) {
+        // Sıra kontrolü: 1. Takım 2'ye tıklar, 2. Takım 1'e.
+        if((currentTurn === 1 && dataset === t1Bottles) || (currentTurn === 2 && dataset === t2Bottles)) {
+            alert("Kendi panona basamazsın!"); return;
+        }
         if(bottle.clicked) return;
-
         bottle.clicked = true;
-        const remainingPoison = dataset.filter(x => x.isPoison && !x.clicked).length;
 
         if(bottle.isPoison) {
-            if(remainingPoison === 0) {
-                endGame("Tüm zehirli şişeler bitti!");
-            } else {
-                showQuestion();
-            }
+            const rem = dataset.filter(x => x.isPoison && !x.clicked).length;
+            if(rem === 0) endGame("Son zehirli şişe bulundu!");
+            else showQuestion();
         } else {
             nextTurn();
         }
@@ -222,35 +220,39 @@
         updateTurnVisuals();
     }
 
+    function updateTurnVisuals() {
+        document.getElementById('t1-sec').classList.toggle('active-team-border', currentTurn === 1);
+        document.getElementById('t2-sec').classList.toggle('active-team-border', currentTurn === 2);
+    }
+
     function showQuestion() {
         const qFrame = document.getElementById('question-frame');
         qFrame.style.display = 'flex';
         
         const qTypes = [
-            { t: (a,b,c) => `Bir mirket saatte ${a} kalori harcıyor. ${b} saat boyunca dans ederse toplam kaç kalori harcar?`, f: (a,b) => a * b, r1: [10,40], r2: [2,9] },
-            { t: (a,b,c) => `Bir uzay gemisi kalkışta ${a} litre yakıt alıyor. Her kat için ${b} litre eklenirse, ${c} katlı binayı geçince kaç litre olur?`, f: (a,b,c) => a + (b * c), r1: [50,150], r2: [5,15], r3: [3,10] },
-            { t: (a,b,c) => `Bir robot saniyede ${a} adım atıyor. ${b} saniye sonra bir çukura düşüp ${c} adım geri kayarsa toplam kaç adım ilerlemiş olur?`, f: (a,b,c) => (a * b) - c, r1: [5,15], r2: [10,20], r3: [10,30] },
-            { t: (a,b,c) => `Bir ejderha her sabah ${a} tane altın yiyor. Kumbarasında ${b} altın varken ${c} gün boyunca yemek yerse kaç altını kalır?`, f: (a,b,c) => b - (a * c), r1: [5,12], r2: [200,400], r3: [5,10] }
+            { t: (a,b) => `Bir mirket saatte ${a} kalori harcıyor. ${b} saat dans ederse kaç kalori yakar?`, f: (a,b) => a*b, r1:[10,40], r2:[2,9] },
+            { t: (a,b,c) => `Bir robot saniyede ${a} adım atıyor. ${b} saniye sonra ${c} adım geri kayarsa kaç adım ilerler?`, f:(a,b,c) => (a*b)-c, r1:[5,15], r2:[10,20], r3:[5,20]},
+            { t: (a,b,c) => `Uzay gemisi ${a} L yakıtla kalkıyor. Her km'de ${b} L ekleniyor. ${c} km sonra kaç L olur?`, f:(a,b,c) => a+(b*c), r1:[100,200], r2:[5,10], r3:[5,15]}
         ];
 
-        const sel = qTypes[Math.floor(Math.random()*qTypes.length)];
-        const v1 = Math.floor(Math.random()*(sel.r1[1]-sel.r1[0]))+sel.r1[0];
-        const v2 = Math.floor(Math.random()*(sel.r2[1]-sel.r2[0]))+sel.r2[0];
-        const v3 = sel.r3 ? Math.floor(Math.random()*(sel.r3[1]-sel.r3[0]))+sel.r3[0] : 0;
+        const s = qTypes[Math.floor(Math.random()*qTypes.length)];
+        const v1 = Math.floor(Math.random()*(s.r1[1]-s.r1[0]))+s.r1[0];
+        const v2 = Math.floor(Math.random()*(s.r2[1]-s.r2[0]))+s.r2[0];
+        const v3 = s.r3 ? Math.floor(Math.random()*(s.r3[1]-s.r3[0]))+s.r3[0] : 0;
         
-        currentCorrectAnswer = sel.f(v1, v2, v3);
-        document.getElementById('question-text').innerText = sel.t(v1, v2, v3);
+        currentCorrectAnswer = s.f(v1, v2, v3);
+        document.getElementById('question-text').innerText = s.t(v1, v2, v3);
         
-        let choices = [currentCorrectAnswer];
-        while(choices.length < 4) {
-            let r = currentCorrectAnswer + Math.floor(Math.random() * 20) - 10;
-            if(!choices.includes(r) && r > 0 && r < 1000) choices.push(r);
+        let ch = [currentCorrectAnswer];
+        while(ch.length < 4){
+            let r = currentCorrectAnswer + Math.floor(Math.random()*40)-20;
+            if(!ch.includes(r) && r > 0) ch.push(r);
         }
-        choices.sort(() => Math.random() - 0.5);
+        ch.sort(()=>Math.random()-0.5);
 
-        const container = document.getElementById('options-container');
-        container.innerHTML = "";
-        choices.forEach(c => {
+        const cont = document.getElementById('options-container');
+        cont.innerHTML = "";
+        ch.forEach(c => {
             const b = document.createElement('button');
             b.innerText = c;
             b.onclick = () => {
@@ -260,26 +262,24 @@
                     nextTurn();
                 } else endGame("Yanlış cevap!");
             };
-            container.appendChild(b);
+            cont.appendChild(b);
         });
 
-        let timeLeft = gameTime;
-        document.getElementById('timer-text').innerText = timeLeft;
+        let tl = gameTime;
+        document.getElementById('timer-text').innerText = tl;
         clearInterval(timerInterval);
         timerInterval = setInterval(() => {
-            timeLeft--;
-            document.getElementById('timer-text').innerText = timeLeft;
-            if(timeLeft <= 0) endGame("Süre doldu!");
+            tl--; document.getElementById('timer-text').innerText = tl;
+            if(tl <= 0) endGame("Süre bitti!");
         }, 1000);
     }
 
-    function endGame(reason) {
+    function endGame(msg) {
         clearInterval(timerInterval);
         document.getElementById('question-frame').style.display = 'none';
         document.getElementById('end-frame').style.display = 'flex';
-        const loser = currentTurn === 1 ? "1. TAKIM" : "2. TAKIM";
-        const winner = currentTurn === 1 ? "2. TAKIM" : "1. TAKIM";
-        document.getElementById('end-subtitle').innerText = reason + " Kazanan: " + winner;
+        const win = currentTurn === 1 ? "2. TAKIM" : "1. TAKIM";
+        document.getElementById('end-subtitle').innerText = msg + " Kazanan: " + win;
     }
 </script>
 </body>
