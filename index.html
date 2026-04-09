@@ -22,15 +22,15 @@
         .game-container { display: flex; justify-content: space-between; width: 100%; gap: 40px; }
         .team-section { flex: 1; text-align: center; background: rgba(0,0,0,0.2); padding: 20px; border-radius: 15px; border: 2px solid transparent; transition: 0.4s; position: relative; }
         
-        /* Blur Efekti */
-        .blur-team { filter: blur(15px); pointer-events: none; opacity: 0.4; }
+        /* Blur ve Gizlilik Efektleri */
+        .blur-team { filter: blur(25px); pointer-events: none; opacity: 0.3; }
         .active-team-border { border-color: #f1c40f; background: rgba(0,0,0,0.4); transform: scale(1.02); }
         
         .bottle-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 20px 0; }
         .bottle { background: #b30000; color: white; font-size: 22px; padding: 15px 0; border: none; cursor: pointer; border-radius: 5px; box-shadow: 0 4px 0 #7b0000; transition: 0.2s; }
-        .bottle.selected-poison { background: #27ae60; border: 2px solid white; }
-        .bottle.safe-clicked { background: #3498db; cursor: not-allowed; }
-        .bottle.poison-clicked { background: #f1c40f; color: black; font-weight: bold; cursor: not-allowed; }
+        .bottle.selected-poison { background: #27ae60; border: 2px solid white; box-shadow: 0 4px 0 #1e7e45; }
+        .bottle.safe-clicked { background: #3498db; cursor: not-allowed; box-shadow: 0 4px 0 #217dbb; }
+        .bottle.poison-clicked { background: #f1c40f; color: black; font-weight: bold; cursor: not-allowed; box-shadow: 0 4px 0 #c29d0b; }
 
         .confirm-btn { background: #27ae60; color: white; font-size: 20px; padding: 12px; width: 100%; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
         .confirm-btn:disabled { background: #7f8c8d; cursor: not-allowed; opacity: 0.5; }
@@ -67,12 +67,12 @@
             <div id="t1-sec" class="team-section">
                 <h2>1. TAKIM</h2>
                 <div class="bottle-grid" id="grid-t1"></div>
-                <button id="btn-conf-1" class="confirm-btn" onclick="nextSetupStep()">SEÇİMLERİ ONAYLA</button>
+                <button id="btn-conf-1" class="confirm-btn" onclick="finishStep()">SEÇİMLERİ ONAYLA</button>
             </div>
             <div id="t2-sec" class="team-section">
                 <h2>2. TAKIM</h2>
                 <div class="bottle-grid" id="grid-t2"></div>
-                <button id="btn-conf-2" class="confirm-btn" onclick="nextSetupStep()">SEÇİMLERİ ONAYLA</button>
+                <button id="btn-conf-2" class="confirm-btn" onclick="finishStep()">SEÇİMLERİ ONAYLA</button>
             </div>
         </div>
     </div>
@@ -91,7 +91,7 @@
 
 <script>
     let maxPoison = 0, gameTime = 0;
-    let setupStep = 1; // 1: T1 yerleştiriyor, 2: T2 yerleştiriyor, 3: Oyun
+    let setupStep = 1; // 1: T1 yerleştiriyor (T2 panosuna), 2: T2 yerleştiriyor (T1 panosuna), 3: Oyun
     let t1Bottles = [], t2Bottles = [];
     let currentTurn = 1; 
     let timerInterval, currentCorrectAnswer;
@@ -122,29 +122,32 @@
         const info = document.getElementById('setup-info');
         const s1 = document.getElementById('t1-sec');
         const s2 = document.getElementById('t2-sec');
+        const b1 = document.getElementById('btn-conf-1');
+        const b2 = document.getElementById('btn-conf-2');
 
         if(setupStep === 1) {
-            info.innerText = "2. TAKIM BAKMASIN! 1. Takım rakibi için zehir yerleştiriyor.";
-            s1.classList.add('blur-team');
-            s2.classList.remove('blur-team');
-            document.getElementById('btn-conf-1').style.display = "none";
-            document.getElementById('btn-conf-2').style.display = "block";
+            info.innerText = "2. TAKIM ARKASINI DÖNSÜN! 1. Takım rakibi için zehir yerleştiriyor.";
+            s1.classList.add('blur-team'); // T1 panosu gizli
+            s2.classList.remove('blur-team'); // T2 panosu açık (zehirleniyor)
+            b1.style.display = "none";
+            b2.style.display = "block";
             renderGrid('grid-t2', t2Bottles, true);
             renderGrid('grid-t1', t1Bottles, false);
         } else if(setupStep === 2) {
-            info.innerText = "1. TAKIM BAKMASIN! 2. Takım rakibi için zehir yerleştiriyor.";
-            s2.classList.add('blur-team');
-            s1.classList.remove('blur-team');
-            document.getElementById('btn-conf-2').style.display = "none";
-            document.getElementById('btn-conf-1').style.display = "block";
+            info.innerText = "1. TAKIM ARKASINI DÖNSÜN! 2. Takım rakibi için zehir yerleştiriyor.";
+            s2.classList.add('blur-team'); // T2 panosu gizli (artık zehirler görünmez)
+            s1.classList.remove('blur-team'); // T1 panosu açık
+            b2.style.display = "none";
+            b1.style.display = "block";
             renderGrid('grid-t1', t1Bottles, true);
-            renderGrid('grid-t2', t2Bottles, false);
+            renderGrid('grid-t2', t2Bottles, false); // T2 zehirleri artık gizli
         } else {
             info.style.background = "#2980b9";
             info.innerText = "OYUN BAŞLADI! SIRA: 1. TAKIM";
-            s1.classList.remove('blur-team'); s2.classList.remove('blur-team');
-            document.getElementById('btn-conf-1').style.display = "none";
-            document.getElementById('btn-conf-2').style.display = "none";
+            s1.classList.remove('blur-team'); 
+            s2.classList.remove('blur-team');
+            b1.style.display = "none";
+            b2.style.display = "none";
             renderGrid('grid-t1', t1Bottles, true);
             renderGrid('grid-t2', t2Bottles, true);
             updateTurnVisuals();
@@ -152,7 +155,7 @@
         checkButtons();
     }
 
-    function nextSetupStep() {
+    function finishStep() {
         setupStep++;
         refreshUI();
     }
@@ -165,14 +168,14 @@
             btn.className = 'bottle';
             btn.innerText = b.id;
 
-            // Görünüm mantığı (Sadece yerleştiren görsün)
-            if(setupStep < 3) {
-                if(b.isPoison) btn.classList.add('selected-poison');
-            } else {
-                if(b.clicked) {
-                    btn.classList.add(b.isPoison ? 'poison-clicked' : 'safe-clicked');
-                    btn.innerText = b.isPoison ? "ZEHİR" : "TEMİZ";
-                }
+            // KRİTİK NOKTA: Sadece kurulum anında yerleştiren takım yeşili görsün
+            if(setupStep === 1 && containerId === 'grid-t2' && b.isPoison) btn.classList.add('selected-poison');
+            if(setupStep === 2 && containerId === 'grid-t1' && b.isPoison) btn.classList.add('selected-poison');
+
+            // Oyun anında tıklananlar
+            if(setupStep === 3 && b.clicked) {
+                btn.classList.add(b.isPoison ? 'poison-clicked' : 'safe-clicked');
+                btn.innerText = b.isPoison ? "ZEHİR" : "TEMİZ";
             }
 
             if(clickable) btn.onclick = () => {
@@ -196,16 +199,15 @@
     }
 
     function handlePlay(bottle, dataset) {
-        // Sıra kontrolü: 1. Takım 2'ye tıklar, 2. Takım 1'e.
         if((currentTurn === 1 && dataset === t1Bottles) || (currentTurn === 2 && dataset === t2Bottles)) {
-            alert("Kendi panona basamazsın!"); return;
+            alert("Kendi panona basamazsın! Rakibin şişelerini seç."); return;
         }
         if(bottle.clicked) return;
         bottle.clicked = true;
 
         if(bottle.isPoison) {
             const rem = dataset.filter(x => x.isPoison && !x.clicked).length;
-            if(rem === 0) endGame("Son zehirli şişe bulundu!");
+            if(rem === 0) endGame("Tüm zehirli şişeler bitti!");
             else showQuestion();
         } else {
             nextTurn();
@@ -246,7 +248,7 @@
         let ch = [currentCorrectAnswer];
         while(ch.length < 4){
             let r = currentCorrectAnswer + Math.floor(Math.random()*40)-20;
-            if(!ch.includes(r) && r > 0) ch.push(r);
+            if(!ch.includes(r) && r > 0 && r < 1000) ch.push(r);
         }
         ch.sort(()=>Math.random()-0.5);
 
