@@ -22,7 +22,6 @@
         .game-container { display: flex; justify-content: space-between; width: 100%; gap: 40px; }
         .team-section { flex: 1; text-align: center; background: rgba(0,0,0,0.2); padding: 20px; border-radius: 15px; border: 2px solid transparent; transition: 0.4s; position: relative; }
         
-        /* Blur ve Gizlilik Efektleri */
         .blur-team { filter: blur(25px); pointer-events: none; opacity: 0.3; }
         .active-team-border { border-color: #f1c40f; background: rgba(0,0,0,0.4); transform: scale(1.02); }
         
@@ -91,7 +90,7 @@
 
 <script>
     let maxPoison = 0, gameTime = 0;
-    let setupStep = 1; // 1: T1 yerleştiriyor (T2 panosuna), 2: T2 yerleştiriyor (T1 panosuna), 3: Oyun
+    let setupStep = 1; // 1: T1 yerleştiriyor (T2'ye), 2: T2 yerleştiriyor (T1'e), 3: Oyun
     let t1Bottles = [], t2Bottles = [];
     let currentTurn = 1; 
     let timerInterval, currentCorrectAnswer;
@@ -127,23 +126,23 @@
 
         if(setupStep === 1) {
             info.innerText = "2. TAKIM ARKASINI DÖNSÜN! 1. Takım rakibi için zehir yerleştiriyor.";
-            s1.classList.add('blur-team'); // T1 panosu gizli
-            s2.classList.remove('blur-team'); // T2 panosu açık (zehirleniyor)
+            s1.classList.add('blur-team');
+            s2.classList.remove('blur-team');
             b1.style.display = "none";
             b2.style.display = "block";
             renderGrid('grid-t2', t2Bottles, true);
             renderGrid('grid-t1', t1Bottles, false);
         } else if(setupStep === 2) {
             info.innerText = "1. TAKIM ARKASINI DÖNSÜN! 2. Takım rakibi için zehir yerleştiriyor.";
-            s2.classList.add('blur-team'); // T2 panosu gizli (artık zehirler görünmez)
-            s1.classList.remove('blur-team'); // T1 panosu açık
+            s2.classList.add('blur-team');
+            s1.classList.remove('blur-team');
             b2.style.display = "none";
             b1.style.display = "block";
             renderGrid('grid-t1', t1Bottles, true);
-            renderGrid('grid-t2', t2Bottles, false); // T2 zehirleri artık gizli
+            renderGrid('grid-t2', t2Bottles, false);
         } else {
             info.style.background = "#2980b9";
-            info.innerText = "OYUN BAŞLADI! SIRA: 1. TAKIM";
+            info.innerText = "OYUN BAŞLADI! SIRA: 1. TAKIM (Kendi panondan temiz şişe seç!)";
             s1.classList.remove('blur-team'); 
             s2.classList.remove('blur-team');
             b1.style.display = "none";
@@ -168,11 +167,9 @@
             btn.className = 'bottle';
             btn.innerText = b.id;
 
-            // KRİTİK NOKTA: Sadece kurulum anında yerleştiren takım yeşili görsün
             if(setupStep === 1 && containerId === 'grid-t2' && b.isPoison) btn.classList.add('selected-poison');
             if(setupStep === 2 && containerId === 'grid-t1' && b.isPoison) btn.classList.add('selected-poison');
 
-            // Oyun anında tıklananlar
             if(setupStep === 3 && b.clicked) {
                 btn.classList.add(b.isPoison ? 'poison-clicked' : 'safe-clicked');
                 btn.innerText = b.isPoison ? "ZEHİR" : "TEMİZ";
@@ -194,20 +191,25 @@
     function checkButtons() {
         const b1 = document.getElementById('btn-conf-1');
         const b2 = document.getElementById('btn-conf-2');
-        b1.disabled = t1Bottles.filter(x => x.isPoison).length !== maxPoison;
-        b2.disabled = t2Bottles.filter(x => x.isPoison).length !== maxPoison;
+        if(b1) b1.disabled = t1Bottles.filter(x => x.isPoison).length !== maxPoison;
+        if(b2) b2.disabled = t2Bottles.filter(x => x.isPoison).length !== maxPoison;
     }
 
     function handlePlay(bottle, dataset) {
-        if((currentTurn === 1 && dataset === t1Bottles) || (currentTurn === 2 && dataset === t2Bottles)) {
-            alert("Kendi panona basamazsın! Rakibin şişelerini seç."); return;
+        // Yeni Kural: Her takım sadece kendi panosuna basar!
+        const isMyGrid = (currentTurn === 1 && dataset === t1Bottles) || (currentTurn === 2 && dataset === t2Bottles);
+        
+        if(!isMyGrid) {
+            alert("Sıra sende! Lütfen kendi panondaki şişelerden birini seç."); return;
         }
+
         if(bottle.clicked) return;
         bottle.clicked = true;
 
         if(bottle.isPoison) {
+            // Zehirli şişe kalma kontrolü
             const rem = dataset.filter(x => x.isPoison && !x.clicked).length;
-            if(rem === 0) endGame("Tüm zehirli şişeler bitti!");
+            if(rem === 0) endGame("Kendi panondaki son zehri buldun!");
             else showQuestion();
         } else {
             nextTurn();
@@ -218,7 +220,7 @@
 
     function nextTurn() {
         currentTurn = currentTurn === 1 ? 2 : 1;
-        document.getElementById('setup-info').innerText = "SIRA: " + currentTurn + ". TAKIM";
+        document.getElementById('setup-info').innerText = "SIRA: " + currentTurn + ". TAKIM (Sıra sende, kendi şişeni seç!)";
         updateTurnVisuals();
     }
 
@@ -280,6 +282,7 @@
         clearInterval(timerInterval);
         document.getElementById('question-frame').style.display = 'none';
         document.getElementById('end-frame').style.display = 'flex';
+        // Kendi panosunda kaybeden elenir, diğer takım kazanır.
         const win = currentTurn === 1 ? "2. TAKIM" : "1. TAKIM";
         document.getElementById('end-subtitle').innerText = msg + " Kazanan: " + win;
     }
