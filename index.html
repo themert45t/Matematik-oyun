@@ -3,79 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Matematik Şişe Oyunu</title>
+    <title>İki Takımlı Matematik Oyunu</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #2c3e50; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; text-align: center; }
+        /* Genel Tasarım ve Arka Plan (Görseldeki yeşil tonu) */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #5b8a1c; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; user-select: none; }
         
         /* Ekran Kapsayıcıları */
-        .screen { background: #34495e; padding: 40px; border-radius: 15px; width: 90%; max-width: 700px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: none; }
-        .active-screen { display: block; }
+        .screen { width: 100%; max-width: 1200px; display: none; flex-direction: column; align-items: center; }
+        .active-screen { display: flex; }
 
-        h1 { color: #f1c40f; margin-top: 0; }
-        h2 { color: #ecf0f1; }
-
-        /* Başlangıç Menüsü Butonları */
+        /* Başlangıç Menüsü */
+        #start-frame { background: rgba(0, 0, 0, 0.7); padding: 40px; border-radius: 15px; text-align: center; }
         .settings-row { margin-bottom: 25px; }
         .settings-row button { background: #7f8c8d; color: white; border: none; padding: 10px 20px; font-size: 18px; border-radius: 5px; cursor: pointer; margin: 5px; transition: 0.2s; }
         .settings-row button.selected { background: #e67e22; transform: scale(1.1); font-weight: bold; }
-        #start-btn, #confirm-btn { background: #27ae60; padding: 15px 30px; font-size: 22px; width: 100%; margin-top: 20px; border-radius: 8px; cursor: pointer; color: white; border: none; }
-        #start-btn:hover, #confirm-btn:hover { background: #2ecc71; }
-        #confirm-btn:disabled { background: #95a5a6; cursor: not-allowed; }
+        #start-btn { background: #27ae60; padding: 15px 30px; font-size: 22px; width: 100%; margin-top: 20px; border-radius: 8px; cursor: pointer; color: white; border: none; }
+        #start-btn:hover { background: #2ecc71; }
 
-        /* Şişe Grid Yapısı */
-        .bottle-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; margin-top: 20px; }
-        .bottle { background: #aa0000; height: 80px; border-radius: 10px; cursor: pointer; border: 3px solid #c0392b; transition: 0.3s; }
-        .bottle.poisoned-setup { background: #00ff00; border-color: #27ae60; }
-        .bottle.safe { background: #3498db; border-color: #2980b9; cursor: not-allowed; }
+        /* Oyun Ekranı Düzeni */
+        #turn-indicator { font-size: 35px; font-weight: bold; margin-bottom: 20px; background: rgba(0,0,0,0.5); padding: 10px 30px; border-radius: 10px; transition: 0.3s; }
+        .game-container { display: flex; justify-content: space-around; width: 100%; }
+        
+        .team-section { width: 40%; text-align: center; }
+        .team-section h2 { font-size: 30px; font-weight: normal; margin-bottom: 15px; }
+        
+        /* Şişe (Buton) Grid Yapısı */
+        .bottle-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 15px; }
+        .bottle { background-color: #b30000; color: white; font-size: 24px; padding: 15px 0; border: none; cursor: pointer; transition: 0.2s; box-shadow: 2px 2px 5px rgba(0,0,0,0.3); }
+        .bottle:hover { filter: brightness(1.2); }
+        .bottle.safe { background-color: #3498db; cursor: not-allowed; }
+        .bottle.poisoned-found { background-color: #27ae60; cursor: not-allowed; }
 
-        /* Soru Ekranı (Önceki Koddan) */
-        #question-frame { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(44, 62, 80, 0.95); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 10; }
-        #timer-text { font-size: 40px; color: #e74c3c; font-weight: bold; margin-bottom: 20px; }
-        #question-text { font-size: 24px; margin-bottom: 30px; max-width: 80%; background: #2c3e50; padding: 20px; border-radius: 10px; }
-        .options { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 80%; max-width: 500px; }
-        .options button { padding: 20px; font-size: 20px; border: none; border-radius: 8px; cursor: pointer; background: #3498db; color: white; transition: 0.2s; }
+        .confirm-btn { background-color: #00aa00; color: white; font-size: 24px; padding: 10px; width: 100%; border: none; cursor: pointer; visibility: hidden; } /* Görseldeki butonu şimdilik gizli tutuyoruz, sıra otomatik geçecek */
+
+        /* Takım Sırası Vurguları */
+        .active-team { transform: scale(1.02); }
+        .inactive-team { opacity: 0.5; pointer-events: none; }
+
+        /* Soru Ekranı */
+        #question-frame { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(30, 40, 50, 0.95); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 10; }
+        #timer-text { font-size: 50px; color: #e74c3c; font-weight: bold; margin-bottom: 20px; }
+        #question-text { font-size: 28px; margin-bottom: 30px; max-width: 80%; background: #2c3e50; padding: 30px; border-radius: 10px; text-align: center; }
+        .options { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 80%; max-width: 600px; }
+        .options button { padding: 25px; font-size: 24px; border: none; border-radius: 8px; cursor: pointer; background: #3498db; color: white; transition: 0.2s; }
         .options button:hover { background: #2980b9; transform: scale(1.05); }
 
-        /* Sonuç Ekranları */
-        .overlay-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 20; }
-        .overlay-screen h1 { font-size: 50px; margin-bottom: 20px; }
-        .restart-btn { background: #e74c3c; padding: 15px 30px; font-size: 20px; border: none; border-radius: 8px; color: white; cursor: pointer; }
+        /* Sonuç Ekranı */
+        .overlay-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 20; text-align: center; }
+        .overlay-screen h1 { font-size: 60px; margin-bottom: 20px; }
+        .restart-btn { background: #e74c3c; padding: 15px 30px; font-size: 24px; border: none; border-radius: 8px; color: white; cursor: pointer; margin-top: 20px; }
     </style>
 </head>
 <body>
 
 <div id="start-frame" class="screen active-screen">
-    <h1>Oyun Ayarları</h1>
-    
+    <h1 style="color: #f1c40f;">Oyun Ayarları</h1>
     <div class="settings-row">
-        <h2>Zehirli Şişe Sayısı</h2>
+        <h2 style="color: white;">Takım Başına Zehirli Şişe</h2>
         <button onclick="setAmount(1)" id="amt-1" class="amt-btn">1</button>
         <button onclick="setAmount(2)" id="amt-2" class="amt-btn">2</button>
         <button onclick="setAmount(3)" id="amt-3" class="amt-btn">3</button>
         <button onclick="setAmount(4)" id="amt-4" class="amt-btn">4</button>
     </div>
-
     <div class="settings-row">
-        <h2>Soru Süresi (Saniye)</h2>
+        <h2 style="color: white;">Soru Süresi (Saniye)</h2>
         <button onclick="setTime(30)" id="time-30" class="time-btn">30</button>
         <button onclick="setTime(45)" id="time-45" class="time-btn">45</button>
         <button onclick="setTime(60)" id="time-60" class="time-btn">60</button>
     </div>
-
-    <button id="start-btn" onclick="startGame()">Oyunu Kur</button>
-</div>
-
-<div id="setup-frame" class="screen">
-    <h1>1. Takım: Zehirleri Yerleştir</h1>
-    <p>Seçilen Zehir Sayısı: <span id="setup-counter">0</span> / <span id="setup-max">0</span></p>
-    <div class="bottle-grid" id="setup-bottles"></div>
-    <button id="confirm-btn" onclick="confirmSetup()" disabled>Seçimi Onayla</button>
+    <button id="start-btn" onclick="startGame()">Oyuna Başla</button>
 </div>
 
 <div id="play-frame" class="screen">
-    <h1>2. Takım: Şişeleri Seç</h1>
-    <p>Zehirli bir şişeye denk gelirsen matematik sorusu çözeceksin!</p>
-    <div class="bottle-grid" id="play-bottles"></div>
+    <div id="turn-indicator" style="color: #3498db;">Sıra: 1. Takım (Team One)</div>
+    
+    <div class="game-container">
+        <div id="team1-section" class="team-section">
+            <h2>Team One</h2>
+            <div class="bottle-grid" id="grid-team1"></div>
+            <button class="confirm-btn">Confirim</button> 
+        </div>
+
+        <div id="team2-section" class="team-section">
+            <h2>Team Two</h2>
+            <div class="bottle-grid" id="grid-team2"></div>
+            <button class="confirm-btn">Confirim</button>
+        </div>
+    </div>
 </div>
 
 <div id="question-frame">
@@ -84,138 +98,145 @@
     <div class="options" id="options-container"></div>
 </div>
 
-<div id="lose-frame" class="overlay-screen">
-    <h1 style="color: #e74c3c;">OYUN BİTTİ!</h1>
-    <p style="font-size: 20px; color: white;">Yanlış cevap verdin veya süre bitti.</p>
-    <button class="restart-btn" onclick="location.reload()">Başa Dön</button>
-</div>
-
-<div id="win-frame" class="overlay-screen">
-    <h1 style="color: #2ecc71;">TEBRİKLER!</h1>
-    <p style="font-size: 20px; color: white;">Tüm zehirli şişeleri başarıyla temizledin!</p>
-    <button class="restart-btn" style="background: #2ecc71;" onclick="location.reload()">Tekrar Oyna</button>
+<div id="end-frame" class="overlay-screen">
+    <h1 id="end-title">OYUN BİTTİ!</h1>
+    <p id="end-desc" style="font-size: 24px; color: white;"></p>
+    <button class="restart-btn" onclick="location.reload()">Yeni Oyun</button>
 </div>
 
 <script>
-    // Global Oyun Değişkenleri
     let maxPoison = 0;
     let gameTime = 0;
-    let currentPoisonCount = 0;
-    let totalBottles = 10; // Toplam şişe sayısı
-    let bottlesData = []; // Şişelerin durumunu tutacak dizi
     
-    // Soru Değişkenleri
+    let team1Bottles = [];
+    let team2Bottles = [];
+    let currentTurn = 1; // 1 = Team One, 2 = Team Two
+    
     let currentCorrectAnswer = 0;
     let timerActive = false;
     let timerInterval;
+    let activeBottleData = null; // Tıklanan şişenin referansı
 
-    // --- 1. MENÜ SEÇİMLERİ ---
+    // Ayar Seçimleri
     function setAmount(val) {
         maxPoison = val;
         document.querySelectorAll('.amt-btn').forEach(btn => btn.classList.remove('selected'));
         document.getElementById('amt-' + val).classList.add('selected');
     }
-
     function setTime(val) {
         gameTime = val;
         document.querySelectorAll('.time-btn').forEach(btn => btn.classList.remove('selected'));
         document.getElementById('time-' + val).classList.add('selected');
     }
 
-    // --- 2. OYUNU KURULUM AŞAMASINA GEÇİRME ---
+    // Oyunu Başlat
     function startGame() {
         if (maxPoison === 0 || gameTime === 0) {
             alert("Lütfen zehir sayısını ve süreyi seçin!");
             return;
         }
-        
-        document.getElementById('setup-max').innerText = maxPoison;
-        
-        // Şişe verilerini oluştur
-        bottlesData = [];
-        for(let i = 0; i < totalBottles; i++) {
-            bottlesData.push({ id: i, isPoisoned: false, isSolved: false });
-        }
 
-        renderSetupBottles();
+        // Şişeleri oluştur ve zehirleri gizle
+        team1Bottles = generateBottles();
+        team2Bottles = generateBottles();
 
         document.getElementById('start-frame').classList.remove('active-screen');
-        document.getElementById('setup-frame').classList.add('active-screen');
-    }
-
-    // Kurulum Ekranındaki Şişeleri Çiz
-    function renderSetupBottles() {
-        const grid = document.getElementById('setup-bottles');
-        grid.innerHTML = "";
-        
-        bottlesData.forEach(bottle => {
-            let btn = document.createElement("div");
-            btn.className = "bottle" + (bottle.isPoisoned ? " poisoned-setup" : "");
-            
-            btn.onclick = () => {
-                // Eğer şişe zaten zehirliyse zehri al
-                if (bottle.isPoisoned) {
-                    bottle.isPoisoned = false;
-                    currentPoisonCount--;
-                } 
-                // Eğer şişe temizse ve maksimum limite ulaşılmadıysa zehirle
-                else if (currentPoisonCount < maxPoison) {
-                    bottle.isPoisoned = true;
-                    currentPoisonCount++;
-                }
-                
-                document.getElementById('setup-counter').innerText = currentPoisonCount;
-                
-                // Confirm butonunu aktif/pasif yap (Roblox'taki return kontrolü)
-                document.getElementById('confirm-btn').disabled = (currentPoisonCount !== maxPoison);
-                
-                renderSetupBottles(); // Ekranı güncelle
-            };
-            grid.appendChild(btn);
-        });
-    }
-
-    // --- 3. OYNANIŞ AŞAMASINA GEÇİŞ ---
-    function confirmSetup() {
-        document.getElementById('setup-frame').classList.remove('active-screen');
         document.getElementById('play-frame').classList.add('active-screen');
-        renderPlayBottles();
+        
+        renderGrids();
+        updateTurnUI();
     }
 
-    // Oynanış Ekranındaki Şişeleri Çiz
-    function renderPlayBottles() {
-        const grid = document.getElementById('play-bottles');
-        grid.innerHTML = "";
-        
-        let remainingPoison = bottlesData.filter(b => b.isPoisoned && !b.isSolved).length;
-        if (remainingPoison === 0) {
-            document.getElementById('win-frame').style.display = 'flex';
-            return;
+    function generateBottles() {
+        let bottles = [];
+        for (let i = 1; i <= 20; i++) {
+            bottles.push({ id: i, isPoisoned: false, isClicked: false });
         }
+        // Rastgele zehir yerleştir
+        let poisonsPlaced = 0;
+        while (poisonsPlaced < maxPoison) {
+            let randomIndex = Math.floor(Math.random() * 20);
+            if (!bottles[randomIndex].isPoisoned) {
+                bottles[randomIndex].isPoisoned = true;
+                poisonsPlaced++;
+            }
+        }
+        return bottles;
+    }
 
-        bottlesData.forEach(bottle => {
-            let btn = document.createElement("div");
-            // Roblox'taki gibi şişeler ilk başta kırmızı (normal) görünür. Çözülenler mavi(safe) olur.
-            btn.className = "bottle" + (bottle.isSolved ? " safe" : "");
+    function renderGrids() {
+        drawGrid('grid-team1', team1Bottles, 1);
+        drawGrid('grid-team2', team2Bottles, 2);
+    }
+
+    function drawGrid(containerId, bottlesArray, teamId) {
+        const grid = document.getElementById(containerId);
+        grid.innerHTML = "";
+
+        bottlesArray.forEach(bottle => {
+            let btn = document.createElement("button");
+            btn.innerText = bottle.id;
             
-            btn.onclick = () => {
-                if (bottle.isSolved) return; // Çözülmüşe bir daha tıklanmasın
-
+            // Renklendirme durumu
+            if (bottle.isClicked) {
                 if (bottle.isPoisoned) {
-                    // Zehirliyse Soru Sor
-                    bottle.isSolved = true; // Doğru bilirse çözülmüş sayılacak
-                    generateQuestion();
+                    btn.className = "bottle poisoned-found"; // Yeşil yap
                 } else {
-                    // Zehirli değilse sadece güvenli olduğunu göster
-                    bottle.isSolved = true;
-                    renderPlayBottles();
+                    btn.className = "bottle safe"; // Mavi yap
                 }
-            };
+            } else {
+                btn.className = "bottle"; // Kırmızı (Normal)
+            }
+
+            btn.onclick = () => handleBottleClick(bottle, teamId);
             grid.appendChild(btn);
         });
     }
 
-    // --- MATEMATİK SORUSU MANTIĞI (ÖNCEKİ KOD) ---
+    function handleBottleClick(bottle, teamId) {
+        if (bottle.isClicked) return; // Zaten tıklandıysa iptal
+
+        bottle.isClicked = true;
+        
+        if (bottle.isPoisoned) {
+            // Zehirli şişe bulundu! Soru sor.
+            activeBottleData = bottle;
+            generateQuestion();
+        } else {
+            // Şişe temiz, sıra değiştir.
+            renderGrids();
+            switchTurn();
+        }
+    }
+
+    function switchTurn() {
+        currentTurn = currentTurn === 1 ? 2 : 1;
+        updateTurnUI();
+    }
+
+    function updateTurnUI() {
+        const indicator = document.getElementById('turn-indicator');
+        const section1 = document.getElementById('team1-section');
+        const section2 = document.getElementById('team2-section');
+
+        if (currentTurn === 1) {
+            indicator.innerText = "Sıra: 1. Takım (Team One)";
+            indicator.style.color = "#f1c40f"; // Sarı vurgu
+            section1.classList.remove('inactive-team');
+            section1.classList.add('active-team');
+            section2.classList.add('inactive-team');
+            section2.classList.remove('active-team');
+        } else {
+            indicator.innerText = "Sıra: 2. Takım (Team Two)";
+            indicator.style.color = "#f1c40f"; // Sarı vurgu
+            section2.classList.remove('inactive-team');
+            section2.classList.add('active-team');
+            section1.classList.add('inactive-team');
+            section1.classList.remove('active-team');
+        }
+    }
+
+    // --- SORU MANTIĞI ---
     function getRandomQuestion() {
         const type = Math.floor(Math.random() * 4) + 1;
         let qText = "", corAns = 0;
@@ -250,21 +271,15 @@
 
     function startTimer() {
         clearInterval(timerInterval);
-        let timeLeft = gameTime; // Başlangıç menüsünden gelen süre
+        let timeLeft = gameTime;
         document.getElementById("timer-text").innerText = timeLeft;
         timerInterval = setInterval(() => {
             timeLeft--;
             document.getElementById("timer-text").innerText = timeLeft;
             if (timeLeft <= 0) {
-                gameOver();
+                gameEnd(false); // Süre bittiğinde kaybeder
             }
         }, 1000);
-    }
-
-    function gameOver() {
-        clearInterval(timerInterval);
-        document.getElementById('question-frame').style.display = 'none';
-        document.getElementById("lose-frame").style.display = "flex";
     }
 
     function generateQuestion() {
@@ -289,17 +304,36 @@
             btn.innerText = val;
             btn.onclick = () => {
                 if (val === currentCorrectAnswer) {
-                    // Doğru cevaplandı
+                    // Soru doğru bilindi
                     clearInterval(timerInterval);
                     document.getElementById('question-frame').style.display = 'none';
-                    renderPlayBottles(); // Tahtayı güncelle (Eğer tüm zehirler bittiyse Win ekranı çıkar)
+                    renderGrids();
+                    switchTurn(); // Doğru bilince zehri temizliyor, sıra rakibe geçiyor
                 } else {
-                    gameOver();
+                    // Yanlış cevap
+                    gameEnd(false);
                 }
             };
             container.appendChild(btn);
         });
         startTimer();
+    }
+
+    function gameEnd(isWin) {
+        clearInterval(timerInterval);
+        document.getElementById('question-frame').style.display = 'none';
+        const endFrame = document.getElementById("end-frame");
+        const endTitle = document.getElementById("end-title");
+        const endDesc = document.getElementById("end-desc");
+
+        endFrame.style.display = "flex";
+        
+        let losingTeamName = currentTurn === 1 ? "1. Takım" : "2. Takım";
+        let winningTeamName = currentTurn === 1 ? "2. Takım" : "1. Takım";
+
+        endTitle.style.color = "#e74c3c";
+        endTitle.innerText = losingTeamName + " KAYBETTİ!";
+        endDesc.innerText = "Yanlış cevap verdiler veya süre bitti. Kazanan: " + winningTeamName;
     }
 </script>
 
