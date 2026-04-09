@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matematik Fonksiyon Yarışması</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #2c3e50; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        #question-frame { background: #34495e; padding: 30px; border-radius: 15px; text-align: center; width: 80%; max-width: 600px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        #timer-text { font-size: 24px; color: #e74c3c; font-weight: bold; margin-bottom: 20px; }
+        #question-text { font-size: 20px; margin-bottom: 30px; min-height: 60px; }
+        .options { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        button { padding: 15px; font-size: 18px; border: none; border-radius: 8px; cursor: pointer; transition: 0.3s; background: #3498db; color: white; }
+        button:hover { background: #2980b9; transform: scale(1.05); }
+        #lose-frame { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); flex-direction: column; justify-content: center; align-items: center; z-index: 10; }
+        .restart-btn { background: #e74c3c; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+<div id="question-frame">
+    <div id="timer-text">60</div>
+    <div id="question-text">Soru yükleniyor...</div>
+    <div class="options" id="options-container">
+        </div>
+</div>
+
+<div id="lose-frame">
+    <h1>OYUN BİTTİ!</h1>
+    <button class="restart-btn" onclick="location.reload()">Tekrar Dene</button>
+</div>
+
+<script>
+    let currentCorrectAnswer = 0;
+    let timerActive = false;
+    let timeLeft = 60;
+    let timerInterval;
+
+    function getRandomQuestion() {
+        const type = Math.floor(Math.random() * 4) + 1;
+        let qText = "";
+        let corAns = 0;
+
+        if (type === 1) {
+            let acilis = Math.floor(Math.random() * 11) + 15;
+            let kmUcreti = Math.floor(Math.random() * 6) + 5;
+            let km = Math.floor(Math.random() * 98) + 3;
+            corAns = acilis + (kmUcreti * km);
+            qText = `Taksi açılışı ${acilis} TL, km başı ${kmUcreti} TL alıyor. ${km} km giden müşteri kaç TL öder?`;
+        } else if (type === 2) {
+            let sabit = Math.floor(Math.random() * 21) + 30;
+            let gbUcreti = Math.floor(Math.random() * 6) + 3;
+            let gb = Math.floor(Math.random() * 79) + 2;
+            corAns = sabit + (gbUcreti * gb);
+            qText = `Aylık sabit ${sabit} TL ödeyen ve aşılan her GB için ${gbUcreti} TL ödeyen biri, ${gb} GB aşarsa kaç TL öder?`;
+        } else if (type === 3) {
+            let baslangic = Math.floor(Math.random() * 101) + 100;
+            let artis = Math.floor(Math.random() * 191) + 10;
+            let gun = Math.floor(Math.random() * 11) + 5;
+            corAns = baslangic + (artis * gun);
+            qText = `Kumbarasında ${baslangic} TL olan biri, her gün ${artis} TL eklerse ${gun} gün sonra kaç TL'si olur?`;
+        } else {
+            let depo = Math.floor(Math.random() * 501) + 500;
+            let tuketim = Math.floor(Math.random() * 31) + 20;
+            let saat = Math.floor(Math.random() * 15) + 2;
+            corAns = depo - (tuketim * saat);
+            qText = `İçinde ${depo} L su bulunan depodan saatte ${tuketim} L su harcanıyor. ${saat} saat sonra kaç L su kalır?`;
+        }
+        return { qText, corAns };
+    }
+
+    function startTimer() {
+        clearInterval(timerInterval);
+        timeLeft = 60;
+        document.getElementById("timer-text").innerText = timeLeft;
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            document.getElementById("timer-text").innerText = timeLeft;
+            if (timeLeft <= 0) {
+                gameOver();
+            }
+        }, 1000);
+    }
+
+    function gameOver() {
+        clearInterval(timerInterval);
+        document.getElementById("lose-frame").style.display = "flex";
+    }
+
+    function generateQuestion() {
+        const data = getRandomQuestion();
+        currentCorrectAnswer = data.corAns;
+        document.getElementById("question-text").innerText = data.qText;
+
+        let choices = [currentCorrectAnswer];
+        while (choices.length < 4) {
+            let wrong = currentCorrectAnswer + (Math.floor(Math.random() * 41) - 20);
+            if (wrong !== currentCorrectAnswer && wrong > 0 && !choices.includes(wrong)) {
+                choices.push(wrong);
+            }
+        }
+        choices.sort(() => Math.random() - 0.5);
+
+        const container = document.getElementById("options-container");
+        container.innerHTML = "";
+        choices.forEach(val => {
+            const btn = document.createElement("button");
+            btn.innerText = val;
+            btn.onclick = () => {
+                if (val === currentCorrectAnswer) {
+                    generateQuestion(); // Doğruysa yeni soruya geç
+                } else {
+                    gameOver();
+                }
+            };
+            container.appendChild(btn);
+        });
+        startTimer();
+    }
+
+    generateQuestion();
+</script>
+
+</body>
+</html>
