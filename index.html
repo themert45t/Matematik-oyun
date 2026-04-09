@@ -7,47 +7,49 @@
     <style>
         body { font-family: 'Segoe UI', sans-serif; background-color: #5b8a1c; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; user-select: none; }
         
-        /* İmza Alanı */
         #credits { position: fixed; bottom: 10px; right: 15px; background: rgba(0,0,0,0.6); padding: 5px 15px; border-radius: 20px; font-size: 14px; border: 1px solid #f1c40f; color: #f1c40f; z-index: 1000; }
 
         .screen { width: 100%; max-width: 1100px; display: none; flex-direction: column; align-items: center; }
         .active-screen { display: flex; }
 
         /* Başlangıç Menüsü */
-        #start-frame { background: rgba(0, 0, 0, 0.8); padding: 40px; border-radius: 20px; text-align: center; border: 2px solid #27ae60; }
-        .settings-row h2 { margin-top: 20px; color: #f1c40f; }
+        #start-frame { background: rgba(0, 0, 0, 0.85); padding: 40px; border-radius: 20px; text-align: center; border: 3px solid #27ae60; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+        .settings-row h2 { margin-top: 20px; color: #f1c40f; font-size: 22px; }
         .settings-row button { background: #34495e; color: white; border: 2px solid #7f8c8d; padding: 12px 25px; font-size: 20px; border-radius: 8px; cursor: pointer; margin: 8px; transition: 0.3s; }
         .settings-row button.selected { background: #e67e22; border-color: white; transform: scale(1.1); }
-        #start-btn { background: #27ae60; padding: 15px 40px; font-size: 24px; margin-top: 30px; border-radius: 10px; cursor: pointer; color: white; border: none; font-weight: bold; }
+        #start-btn { background: #27ae60; padding: 15px 45px; font-size: 24px; margin-top: 30px; border-radius: 10px; cursor: pointer; color: white; border: none; font-weight: bold; }
 
-        /* Bilgilendirme Kutusu */
-        #setup-info { background: #c0392b; padding: 15px 30px; border-radius: 10px; font-size: 22px; margin-bottom: 20px; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.3); text-align: center; width: 90%; }
+        /* Üst Bilgi Paneli */
+        #setup-info { background: #c0392b; padding: 20px; border-radius: 12px; font-size: 24px; margin-bottom: 25px; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.3); text-align: center; width: 95%; border: 2px solid rgba(255,255,255,0.2); }
 
         /* Oyun Alanı */
-        .game-container { display: flex; justify-content: space-between; width: 100%; gap: 40px; }
-        .team-section { flex: 1; text-align: center; background: rgba(0,0,0,0.2); padding: 20px; border-radius: 15px; border: 2px solid transparent; transition: 0.3s; }
-        .active-team-border { border-color: #f1c40f; background: rgba(0,0,0,0.4); }
+        .game-container { display: flex; justify-content: space-between; width: 100%; gap: 30px; }
+        .team-section { flex: 1; text-align: center; background: rgba(0,0,0,0.3); padding: 20px; border-radius: 15px; border: 3px solid transparent; transition: 0.4s; }
+        .active-team-border { border-color: #f1c40f; background: rgba(0,0,0,0.5); box-shadow: 0 0 15px #f1c40f; }
+        .inactive-team { opacity: 0.4; pointer-events: none; filter: grayscale(0.5); }
         
         .bottle-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 20px 0; }
         
-        /* Butonlar */
-        .bottle { background: #b30000; color: white; font-size: 22px; padding: 15px 0; border: none; cursor: pointer; border-radius: 5px; box-shadow: 0 4px 0 #7b0000; }
-        .bottle:active { transform: translateY(2px); box-shadow: 0 2px 0 #7b0000; }
-        .bottle.selected-poison { background: #27ae60; border: 3px solid white; box-shadow: 0 4px 0 #1e7e45; } 
-        .bottle.safe-clicked { background: #3498db; cursor: not-allowed; box-shadow: 0 4px 0 #217dbb; } 
-        .bottle.poison-clicked { background: #f1c40f; color: black; font-weight: bold; cursor: not-allowed; box-shadow: 0 4px 0 #c29d0b; } 
+        /* Şişe Tasarımları */
+        .bottle { background: #b30000; color: white; font-size: 22px; padding: 18px 0; border: none; cursor: pointer; border-radius: 8px; box-shadow: 0 5px 0 #7b0000; position: relative; }
+        .bottle:active { transform: translateY(3px); box-shadow: 0 2px 0 #7b0000; }
+        .bottle.selected-poison { background: #27ae60; border: 2px solid white; box-shadow: 0 5px 0 #1e7e45; } 
+        .bottle.safe-clicked { background: #3498db; cursor: not-allowed; box-shadow: 0 5px 0 #217dbb; } 
+        .bottle.poison-clicked { background: #f1c40f; color: black; font-weight: bold; cursor: not-allowed; box-shadow: 0 5px 0 #c29d0b; } 
 
-        .confirm-btn { background: #27ae60; color: white; font-size: 22px; padding: 12px; width: 100%; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; text-transform: uppercase; }
+        .confirm-btn { background: #27ae60; color: white; font-size: 22px; padding: 15px; width: 100%; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
         .confirm-btn:disabled { background: #7f8c8d; cursor: not-allowed; opacity: 0.5; }
 
-        /* Soru ve Sonuç Panelleri */
-        #question-frame, .overlay-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 100; }
-        #question-text { background: #2c3e50; padding: 30px; border-radius: 15px; margin-bottom: 20px; border: 2px solid #3498db; }
-        .options { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 80%; max-width: 500px; }
-        .options button { padding: 20px; font-size: 24px; border-radius: 10px; border: none; cursor: pointer; background: #3498db; color: white; font-weight: bold; }
-        .options button:hover { background: #2980b9; }
+        /* Soru Ekranı (Roblox Tarzı) */
+        #question-frame { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(20, 30, 48, 0.98); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 2000; }
+        #question-text { background: #2c3e50; padding: 35px; border-radius: 15px; margin-bottom: 25px; border: 3px solid #3498db; width: 80%; max-width: 800px; font-size: 30px; text-align: center; line-height: 1.4; }
+        .options { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 80%; max-width: 600px; }
+        .options button { padding: 25px; font-size: 26px; border-radius: 12px; border: none; cursor: pointer; background: #3498db; color: white; font-weight: bold; transition: 0.2s; box-shadow: 0 6px 0 #217dbb; }
+        .options button:active { transform: translateY(3px); box-shadow: 0 3px 0 #217dbb; }
 
-        .restart-btn { background: #27ae60; padding: 15px 40px; font-size: 22px; color: white; border: none; border-radius: 10px; cursor: pointer; margin-top: 30px; font-weight: bold; }
+        #timer-text { font-size: 80px; color: #e74c3c; margin: 0; text-shadow: 0 0 10px rgba(231, 76, 60, 0.5); }
+
+        .overlay-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 3000; }
     </style>
 </head>
 <body>
@@ -55,60 +57,60 @@
     <div id="credits">Mertcan Koca 10/B Matematik Proje Ödevi</div>
 
     <div id="start-frame" class="screen active-screen">
-        <h1 style="font-size: 45px; margin-bottom: 5px; color: #f1c40f;">Matematik Şişe Düellosu</h1>
-        <p style="font-size: 18px; margin-bottom: 30px;">Zehirleri gizle, rakibini ele!</p>
+        <h1 style="font-size: 50px; color: #f1c40f; margin-bottom: 0;">MATEMATİK DÜELLOSU</h1>
+        <p style="font-size: 20px; opacity: 0.8;">Mertcan Koca Proje Çalışması</p>
         
         <div class="settings-row">
-            <h2>Zehirli Şişe Sayısı</h2>
+            <h2>Saklanacak Zehir Sayısı</h2>
             <button onclick="setAmount(5, this)">5</button>
             <button onclick="setAmount(10, this)">10</button>
             <button onclick="setAmount(15, this)">15</button>
         </div>
         <div class="settings-row">
-            <h2>Soru Süresi (Saniye)</h2>
-            <button onclick="setTime(30, this)">30</button>
-            <button onclick="setTime(45, this)">45</button>
-            <button onclick="setTime(60, this)">60</button>
+            <h2>Soru Başına Süre</h2>
+            <button onclick="setTime(30, this)">30 Saniye</button>
+            <button onclick="setTime(45, this)">45 Saniye</button>
+            <button onclick="setTime(60, this)">60 Saniye</button>
         </div>
-        <button id="start-btn" onclick="initSetup()">KURULUMA BAŞLA</button>
+        <button id="start-btn" onclick="initSetup()">OYUNU BAŞLAT</button>
     </div>
 
     <div id="main-game-frame" class="screen">
-        <div id="setup-info">AYARLAR YÜKLENİYOR...</div>
+        <div id="setup-info">HAZIRLANIYOR...</div>
         
         <div class="game-container">
             <div id="t1-sec" class="team-section">
-                <h2 style="font-size: 28px;">1. TAKIM</h2>
+                <h2 style="font-size: 30px; color: #3498db;">1. TAKIM</h2>
                 <div class="bottle-grid" id="grid-t1"></div>
-                <button id="btn-conf-1" class="confirm-btn" onclick="finishTeamSetup(1)">SEÇİMLERİ ONAYLA</button>
+                <button id="btn-conf-1" class="confirm-btn" onclick="finishTeamSetup(1)">SEÇİMLERİ KAYDET</button>
             </div>
 
             <div id="t2-sec" class="team-section">
-                <h2 style="font-size: 28px;">2. TAKIM</h2>
+                <h2 style="font-size: 30px; color: #e74c3c;">2. TAKIM</h2>
                 <div class="bottle-grid" id="grid-t2"></div>
-                <button id="btn-conf-2" class="confirm-btn" onclick="finishTeamSetup(2)">SEÇİMLERİ ONAYLA</button>
+                <button id="btn-conf-2" class="confirm-btn" onclick="finishTeamSetup(2)">SEÇİMLERİ KAYDET</button>
             </div>
         </div>
     </div>
 
     <div id="question-frame">
-        <div style="font-size: 20px; color: #f1c40f; margin-bottom: 10px;">KALAN SÜRE</div>
-        <h2 id="timer-text" style="font-size: 70px; color: #e74c3c; margin: 0 0 20px 0;">60</h2>
-        <div id="question-text" style="font-size: 28px; text-align: center;">Soru yükleniyor...</div>
+        <div style="font-size: 22px; color: #f1c40f; margin-bottom: 5px;">SÜRE AZALIYOR!</div>
+        <h2 id="timer-text">60</h2>
+        <div id="question-text">Soru hazırlanıyor...</div>
         <div class="options" id="options-container"></div>
     </div>
 
     <div id="end-frame" class="overlay-screen">
         <h1 id="end-title" style="font-size: 60px; color: #e74c3c;">OYUN BİTTİ</h1>
-        <p id="end-subtitle" style="font-size: 24px; margin-bottom: 20px;"></p>
-        <button class="restart-btn" onclick="location.reload()">BAŞTAN BAŞLA</button>
+        <p id="end-subtitle" style="font-size: 28px; margin-bottom: 30px;"></p>
+        <button style="padding: 15px 50px; font-size: 22px; cursor: pointer; background: #27ae60; color: white; border: none; border-radius: 12px; font-weight: bold;" onclick="location.reload()">YENİDEN BAŞLA</button>
     </div>
 
 <script>
     let maxPoison = 0, gameTime = 0;
-    let setupStage = 1; // 1: T1 seçiyor, 2: T2 seçiyor, 3: Oyun başladı
+    let setupStage = 1; // 1: T1 yerleştiriyor, 2: T2 yerleştiriyor, 3: Savaş başladı
     let t1Bottles = [], t2Bottles = [];
-    let currentTurn = 1;
+    let currentTurn = 1; 
     let timerInterval, currentCorrectAnswer;
 
     function setAmount(v, btn) {
@@ -123,13 +125,11 @@
     }
 
     function initSetup() {
-        if(maxPoison === 0 || gameTime === 0) return alert("Lütfen önce zehirli şişe sayısını ve süreyi seçin!");
-        
+        if(maxPoison === 0 || gameTime === 0) return alert("Lütfen ayarları seçin!");
         for(let i=1; i<=20; i++) {
             t1Bottles.push({id: i, isPoison: false, clicked: false});
             t2Bottles.push({id: i, isPoison: false, clicked: false});
         }
-        
         document.getElementById('start-frame').classList.remove('active-screen');
         document.getElementById('main-game-frame').classList.add('active-screen');
         updateSetupUI();
@@ -139,45 +139,36 @@
         const info = document.getElementById('setup-info');
         const b1 = document.getElementById('btn-conf-1');
         const b2 = document.getElementById('btn-conf-2');
+        const s1 = document.getElementById('t1-sec');
+        const s2 = document.getElementById('t2-sec');
 
         if(setupStage === 1) {
-            info.style.background = "#c0392b";
-            info.innerText = "2. TAKIM ARKASINI DÖNSÜN! 1. Takım, 2. Takım'ın şişelerine zehir yerleştiriyor...";
-            b1.style.visibility = "hidden";
-            b2.style.visibility = "visible";
+            info.innerText = "1. TAKIM: 2. Takım'ın panosuna " + maxPoison + " adet zehir sakla!";
+            b1.style.display = "none";
+            b2.style.display = "block";
+            s1.classList.add('inactive-team');
+            s2.classList.add('active-team-border');
             renderGrid('grid-t2', t2Bottles, true);
             renderGrid('grid-t1', t1Bottles, false);
-            document.getElementById('t2-sec').classList.add('active-team-border');
-            document.getElementById('t1-sec').classList.remove('active-team-border');
         } else if(setupStage === 2) {
-            info.style.background = "#c0392b";
-            info.innerText = "1. TAKIM ARKASINI DÖNSÜN! 2. Takım, 1. Takım'ın şişelerine zehir yerleştiriyor...";
-            b2.style.visibility = "hidden";
-            b1.style.visibility = "visible";
+            info.innerText = "2. TAKIM: 1. Takım'ın panosuna " + maxPoison + " adet zehir sakla!";
+            b2.style.display = "none";
+            b1.style.display = "block";
+            s2.classList.add('inactive-team');
+            s2.classList.remove('active-team-border');
+            s1.classList.remove('inactive-team');
+            s1.classList.add('active-team-border');
             renderGrid('grid-t1', t1Bottles, true);
             renderGrid('grid-t2', t2Bottles, false);
-            document.getElementById('t1-sec').classList.add('active-team-border');
-            document.getElementById('t2-sec').classList.remove('active-team-border');
         } else {
             info.style.background = "#2980b9";
-            info.innerText = "OYUN BAŞLADI! SIRA: 1. TAKIM";
-            b1.style.display = "none";
-            b2.style.display = "none";
+            info.innerText = "SAVAŞ BAŞLADI! SIRA 1. TAKIMDA (Rakibe saldır!)";
+            b1.style.display = "none"; b2.style.display = "none";
             renderGrid('grid-t1', t1Bottles, true);
             renderGrid('grid-t2', t2Bottles, true);
-            updateTurnVisuals();
+            refreshBattleVisuals();
         }
         checkConfirmStatus();
-    }
-
-    function updateTurnVisuals() {
-        if(currentTurn === 1) {
-            document.getElementById('t1-sec').classList.remove('active-team-border');
-            document.getElementById('t2-sec').classList.add('active-team-border');
-        } else {
-            document.getElementById('t2-sec').classList.remove('active-team-border');
-            document.getElementById('t1-sec').classList.add('active-team-border');
-        }
     }
 
     function renderGrid(containerId, data, clickable) {
@@ -187,127 +178,140 @@
             const btn = document.createElement('button');
             btn.className = 'bottle';
             btn.innerText = b.id;
-
-            if(setupStage < 3) {
-                if(b.isPoison) btn.classList.add('selected-poison');
-            } else {
-                if(b.clicked) {
-                    btn.classList.add(b.isPoison ? 'poison-clicked' : 'safe-clicked');
-                    btn.innerText = b.isPoison ? "ZEHİR" : "TEMİZ";
+            if(setupStage < 3 && b.isPoison) btn.classList.add('selected-poison');
+            if(setupStage === 3 && b.clicked) {
+                btn.classList.add(b.isPoison ? 'poison-clicked' : 'safe-clicked');
+                btn.innerText = b.isPoison ? "ZEHİR" : "TEMİZ";
+            }
+            if(clickable) btn.onclick = () => {
+                if(setupStage < 3) {
+                    const count = data.filter(x => x.isPoison).length;
+                    if(!b.isPoison && count < maxPoison) b.isPoison = true;
+                    else if(b.isPoison) b.isPoison = false;
+                    renderGrid(containerId, data, true);
+                    checkConfirmStatus();
+                } else {
+                    handleAttack(b, data);
                 }
-            }
-
-            if(clickable) {
-                btn.onclick = () => {
-                    if(setupStage < 3) {
-                        const currentPoisonCount = data.filter(x => x.isPoison).length;
-                        if(!b.isPoison && currentPoisonCount < maxPoison) b.isPoison = true;
-                        else if(b.isPoison) b.isPoison = false;
-                        renderGrid(containerId, data, true);
-                        checkConfirmStatus();
-                    } else {
-                        handlePlayClick(b, data);
-                    }
-                };
-            }
+            };
             grid.appendChild(btn);
         });
     }
 
     function checkConfirmStatus() {
-        const count1 = t1Bottles.filter(x => x.isPoison).length;
-        const count2 = t2Bottles.filter(x => x.isPoison).length;
-        const b1 = document.getElementById('btn-conf-1');
-        const b2 = document.getElementById('btn-conf-2');
-        if(b1) b1.disabled = (count1 !== maxPoison);
-        if(b2) b2.disabled = (count2 !== maxPoison);
+        const c1 = t1Bottles.filter(x => x.isPoison).length;
+        const c2 = t2Bottles.filter(x => x.isPoison).length;
+        if(document.getElementById('btn-conf-1')) document.getElementById('btn-conf-1').disabled = (c1 !== maxPoison);
+        if(document.getElementById('btn-conf-2')) document.getElementById('btn-conf-2').disabled = (c2 !== maxPoison);
     }
 
-    function finishTeamSetup(team) {
-        if(setupStage === 1) {
-            setupStage = 2;
-        } else {
-            setupStage = 3;
-        }
+    function finishTeamSetup(n) {
+        if(setupStage === 1) setupStage = 2;
+        else setupStage = 3;
         updateSetupUI();
     }
 
-    function handlePlayClick(bottle, dataset) {
-        // Sıra kontrolü: 1. Takım 2. Takım'ın şişelerine, 2. Takım 1. Takım'ın şişelerine basar
+    function handleAttack(bottle, dataset) {
+        if(bottle.clicked) return;
         const isT1Pano = (dataset === t1Bottles);
-        if(currentTurn === 1 && !isT1Pano) { /* OK */ }
-        else if(currentTurn === 2 && isT1Pano) { /* OK */ }
-        else {
-            alert("Kendi panona basamazsın! Rakibin şişelerinden birini seç.");
+        // 1. Takım sadece 2. Takım'ın panosuna (t2Bottles) basabilir
+        if((currentTurn === 1 && isT1Pano) || (currentTurn === 2 && !isT1Pano)) {
+            alert("Kendi panona saldıramazsın! Rakibin şişelerini seç.");
             return;
         }
 
-        if(bottle.clicked) return;
         bottle.clicked = true;
-        
         if(bottle.isPoison) {
-            showQuestion();
+            generateRobloxQuestion();
         } else {
-            nextTurn();
+            switchTurn();
         }
         renderGrid('grid-t1', t1Bottles, true);
         renderGrid('grid-t2', t2Bottles, true);
     }
 
-    function nextTurn() {
+    function switchTurn() {
         currentTurn = currentTurn === 1 ? 2 : 1;
-        document.getElementById('setup-info').innerText = "SIRA: " + (currentTurn === 1 ? "1. TAKIM" : "2. TAKIM");
-        updateTurnVisuals();
+        refreshBattleVisuals();
     }
 
-    function showQuestion() {
+    function refreshBattleVisuals() {
+        const info = document.getElementById('setup-info');
+        const s1 = document.getElementById('t1-sec');
+        const s2 = document.getElementById('t2-sec');
+        info.innerText = "SIRA: " + currentTurn + ". TAKIMDA! (Rakip panodan şişe seç)";
+        
+        if(currentTurn === 1) {
+            s1.classList.add('inactive-team'); s1.classList.remove('active-team-border');
+            s2.classList.remove('inactive-team'); s2.classList.add('active-team-border');
+        } else {
+            s2.classList.add('inactive-team'); s2.classList.remove('active-team-border');
+            s1.classList.remove('inactive-team'); s1.classList.add('active-team-border');
+        }
+    }
+
+    // ROBLOX SCRIPTİNDEKİ SORU SİSTEMİ
+    function generateRobloxQuestion() {
         const qFrame = document.getElementById('question-frame');
         qFrame.style.display = 'flex';
         
-        // Rastgele Matematik Sorusu Üretimi
-        const isProblem = Math.random() > 0.5;
-        let qText, corAns;
+        const type = Math.floor(Math.random() * 4) + 1;
+        let qText = "", corAns = 0;
 
-        if(isProblem) {
-            const baslangic = Math.floor(Math.random() * 50) + 10;
-            const artis = Math.floor(Math.random() * 10) + 5;
-            const gun = Math.floor(Math.random() * 7) + 3;
+        if (type === 1) {
+            let acilis = Math.floor(Math.random() * 11) + 15;
+            let kmUcreti = Math.floor(Math.random() * 6) + 5;
+            let km = Math.floor(Math.random() * 98) + 3;
+            corAns = acilis + (kmUcreti * km);
+            qText = `Taksi açılışı ${acilis} TL, km başı ${kmUcreti} TL. ${km} km giden müşteri kaç TL öder?`;
+        } else if (type === 2) {
+            let sabit = Math.floor(Math.random() * 21) + 30;
+            let gbUcreti = Math.floor(Math.random() * 6) + 3;
+            let gb = Math.floor(Math.random() * 79) + 2;
+            corAns = sabit + (gbUcreti * gb);
+            qText = `Sabit ${sabit} TL fatura ve aşılan her GB için ${gbUcreti} TL. ${gb} GB aşım yapan kişi kaç TL öder?`;
+        } else if (type === 3) {
+            let baslangic = Math.floor(Math.random() * 101) + 100;
+            let artis = Math.floor(Math.random() * 191) + 10;
+            let gun = Math.floor(Math.random() * 11) + 5;
             corAns = baslangic + (artis * gun);
-            qText = `Kumbarasında ${baslangic} TL olan biri, her gün kumbaraya ${artis} TL eklerse ${gun} gün sonra kaç TL'si olur?`;
+            qText = `Kumbarada ${baslangic} TL var. Her gün ${artis} TL eklenirse ${gun} gün sonra toplam kaç TL olur?`;
         } else {
-            const n1 = Math.floor(Math.random() * 80) + 20;
-            const n2 = Math.floor(Math.random() * 80) + 20;
-            corAns = n1 + n2;
-            qText = `${n1} + ${n2} işleminin sonucu kaçtır?`;
+            let depo = Math.floor(Math.random() * 501) + 500;
+            let tuketim = Math.floor(Math.random() * 31) + 20;
+            let saat = Math.floor(Math.random() * 15) + 2;
+            corAns = depo - (tuketim * saat);
+            qText = `Depoda ${depo} L su var. Saatte ${tuketim} L harcanıyor. ${saat} saat sonra kaç L su kalır?`;
         }
-        
+
         currentCorrectAnswer = corAns;
         document.getElementById('question-text').innerText = qText;
         
-        let choices = [currentCorrectAnswer];
+        let choices = [corAns];
         while(choices.length < 4) {
-            let r = currentCorrectAnswer + Math.floor(Math.random() * 20) - 10;
-            if(!choices.includes(r) && r > 0) choices.push(r);
+            let offset = Math.floor(Math.random() * 41) - 20;
+            let wrong = corAns + offset;
+            if(wrong !== corAns && wrong > 0 && !choices.includes(wrong)) choices.push(wrong);
         }
         choices.sort(() => Math.random() - 0.5);
 
         const container = document.getElementById('options-container');
         container.innerHTML = "";
         choices.forEach(c => {
-            const b = document.createElement('button');
-            b.innerText = c;
-            b.onclick = () => {
+            const btn = document.createElement('button');
+            btn.innerText = c;
+            btn.onclick = () => {
                 if(c === currentCorrectAnswer) {
                     clearInterval(timerInterval);
                     qFrame.style.display = 'none';
-                    nextTurn();
+                    switchTurn(); // Doğru bilince canını kurtarır, sıra rakibe geçer
                     renderGrid('grid-t1', t1Bottles, true);
                     renderGrid('grid-t2', t2Bottles, true);
                 } else {
-                    endGame("Yanlış cevap verildi!");
+                    endGame("Yanlış cevap!");
                 }
             };
-            container.appendChild(b);
+            container.appendChild(btn);
         });
 
         let timeLeft = gameTime;
@@ -316,7 +320,7 @@
         timerInterval = setInterval(() => {
             timeLeft--;
             document.getElementById('timer-text').innerText = timeLeft;
-            if(timeLeft <= 0) endGame("Süre doldu!");
+            if(timeLeft <= 0) endGame("Süre bitti!");
         }, 1000);
     }
 
@@ -325,11 +329,9 @@
         document.getElementById('question-frame').style.display = 'none';
         const endFrame = document.getElementById('end-frame');
         endFrame.style.display = 'flex';
-        
-        const loser = currentTurn === 1 ? "1. TAKIM" : "2. TAKIM";
-        const winner = currentTurn === 1 ? "2. TAKIM" : "1. TAKIM";
-        
-        document.getElementById('end-title').innerText = loser + " ELENDİ!";
+        const loser = currentTurn + ". TAKIM";
+        const winner = (currentTurn === 1 ? 2 : 1) + ". TAKIM";
+        document.getElementById('end-title').innerText = loser + " KAYBETTİ!";
         document.getElementById('end-subtitle').innerText = reason + " Kazanan: " + winner;
     }
 </script>
