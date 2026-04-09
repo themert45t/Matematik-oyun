@@ -3,43 +3,222 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Matematik Fonksiyon Yarışması</title>
+    <title>Matematik Şişe Oyunu</title>
     <style>
-        body { font-family: Arial, sans-serif; background-color: #2c3e50; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        #question-frame { background: #34495e; padding: 30px; border-radius: 15px; text-align: center; width: 80%; max-width: 600px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        #timer-text { font-size: 24px; color: #e74c3c; font-weight: bold; margin-bottom: 20px; }
-        #question-text { font-size: 20px; margin-bottom: 30px; min-height: 60px; }
-        .options { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        button { padding: 15px; font-size: 18px; border: none; border-radius: 8px; cursor: pointer; transition: 0.3s; background: #3498db; color: white; }
-        button:hover { background: #2980b9; transform: scale(1.05); }
-        #lose-frame { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); flex-direction: column; justify-content: center; align-items: center; z-index: 10; }
-        .restart-btn { background: #e74c3c; margin-top: 20px; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #2c3e50; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; text-align: center; }
+        
+        /* Ekran Kapsayıcıları */
+        .screen { background: #34495e; padding: 40px; border-radius: 15px; width: 90%; max-width: 700px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: none; }
+        .active-screen { display: block; }
+
+        h1 { color: #f1c40f; margin-top: 0; }
+        h2 { color: #ecf0f1; }
+
+        /* Başlangıç Menüsü Butonları */
+        .settings-row { margin-bottom: 25px; }
+        .settings-row button { background: #7f8c8d; color: white; border: none; padding: 10px 20px; font-size: 18px; border-radius: 5px; cursor: pointer; margin: 5px; transition: 0.2s; }
+        .settings-row button.selected { background: #e67e22; transform: scale(1.1); font-weight: bold; }
+        #start-btn, #confirm-btn { background: #27ae60; padding: 15px 30px; font-size: 22px; width: 100%; margin-top: 20px; border-radius: 8px; cursor: pointer; color: white; border: none; }
+        #start-btn:hover, #confirm-btn:hover { background: #2ecc71; }
+        #confirm-btn:disabled { background: #95a5a6; cursor: not-allowed; }
+
+        /* Şişe Grid Yapısı */
+        .bottle-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; margin-top: 20px; }
+        .bottle { background: #aa0000; height: 80px; border-radius: 10px; cursor: pointer; border: 3px solid #c0392b; transition: 0.3s; }
+        .bottle.poisoned-setup { background: #00ff00; border-color: #27ae60; }
+        .bottle.safe { background: #3498db; border-color: #2980b9; cursor: not-allowed; }
+
+        /* Soru Ekranı (Önceki Koddan) */
+        #question-frame { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(44, 62, 80, 0.95); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 10; }
+        #timer-text { font-size: 40px; color: #e74c3c; font-weight: bold; margin-bottom: 20px; }
+        #question-text { font-size: 24px; margin-bottom: 30px; max-width: 80%; background: #2c3e50; padding: 20px; border-radius: 10px; }
+        .options { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 80%; max-width: 500px; }
+        .options button { padding: 20px; font-size: 20px; border: none; border-radius: 8px; cursor: pointer; background: #3498db; color: white; transition: 0.2s; }
+        .options button:hover { background: #2980b9; transform: scale(1.05); }
+
+        /* Sonuç Ekranları */
+        .overlay-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 20; }
+        .overlay-screen h1 { font-size: 50px; margin-bottom: 20px; }
+        .restart-btn { background: #e74c3c; padding: 15px 30px; font-size: 20px; border: none; border-radius: 8px; color: white; cursor: pointer; }
     </style>
 </head>
 <body>
 
+<div id="start-frame" class="screen active-screen">
+    <h1>Oyun Ayarları</h1>
+    
+    <div class="settings-row">
+        <h2>Zehirli Şişe Sayısı</h2>
+        <button onclick="setAmount(1)" id="amt-1" class="amt-btn">1</button>
+        <button onclick="setAmount(2)" id="amt-2" class="amt-btn">2</button>
+        <button onclick="setAmount(3)" id="amt-3" class="amt-btn">3</button>
+        <button onclick="setAmount(4)" id="amt-4" class="amt-btn">4</button>
+    </div>
+
+    <div class="settings-row">
+        <h2>Soru Süresi (Saniye)</h2>
+        <button onclick="setTime(30)" id="time-30" class="time-btn">30</button>
+        <button onclick="setTime(45)" id="time-45" class="time-btn">45</button>
+        <button onclick="setTime(60)" id="time-60" class="time-btn">60</button>
+    </div>
+
+    <button id="start-btn" onclick="startGame()">Oyunu Kur</button>
+</div>
+
+<div id="setup-frame" class="screen">
+    <h1>1. Takım: Zehirleri Yerleştir</h1>
+    <p>Seçilen Zehir Sayısı: <span id="setup-counter">0</span> / <span id="setup-max">0</span></p>
+    <div class="bottle-grid" id="setup-bottles"></div>
+    <button id="confirm-btn" onclick="confirmSetup()" disabled>Seçimi Onayla</button>
+</div>
+
+<div id="play-frame" class="screen">
+    <h1>2. Takım: Şişeleri Seç</h1>
+    <p>Zehirli bir şişeye denk gelirsen matematik sorusu çözeceksin!</p>
+    <div class="bottle-grid" id="play-bottles"></div>
+</div>
+
 <div id="question-frame">
     <div id="timer-text">60</div>
     <div id="question-text">Soru yükleniyor...</div>
-    <div class="options" id="options-container">
-        </div>
+    <div class="options" id="options-container"></div>
 </div>
 
-<div id="lose-frame">
-    <h1>OYUN BİTTİ!</h1>
-    <button class="restart-btn" onclick="location.reload()">Tekrar Dene</button>
+<div id="lose-frame" class="overlay-screen">
+    <h1 style="color: #e74c3c;">OYUN BİTTİ!</h1>
+    <p style="font-size: 20px; color: white;">Yanlış cevap verdin veya süre bitti.</p>
+    <button class="restart-btn" onclick="location.reload()">Başa Dön</button>
+</div>
+
+<div id="win-frame" class="overlay-screen">
+    <h1 style="color: #2ecc71;">TEBRİKLER!</h1>
+    <p style="font-size: 20px; color: white;">Tüm zehirli şişeleri başarıyla temizledin!</p>
+    <button class="restart-btn" style="background: #2ecc71;" onclick="location.reload()">Tekrar Oyna</button>
 </div>
 
 <script>
+    // Global Oyun Değişkenleri
+    let maxPoison = 0;
+    let gameTime = 0;
+    let currentPoisonCount = 0;
+    let totalBottles = 10; // Toplam şişe sayısı
+    let bottlesData = []; // Şişelerin durumunu tutacak dizi
+    
+    // Soru Değişkenleri
     let currentCorrectAnswer = 0;
     let timerActive = false;
-    let timeLeft = 60;
     let timerInterval;
 
+    // --- 1. MENÜ SEÇİMLERİ ---
+    function setAmount(val) {
+        maxPoison = val;
+        document.querySelectorAll('.amt-btn').forEach(btn => btn.classList.remove('selected'));
+        document.getElementById('amt-' + val).classList.add('selected');
+    }
+
+    function setTime(val) {
+        gameTime = val;
+        document.querySelectorAll('.time-btn').forEach(btn => btn.classList.remove('selected'));
+        document.getElementById('time-' + val).classList.add('selected');
+    }
+
+    // --- 2. OYUNU KURULUM AŞAMASINA GEÇİRME ---
+    function startGame() {
+        if (maxPoison === 0 || gameTime === 0) {
+            alert("Lütfen zehir sayısını ve süreyi seçin!");
+            return;
+        }
+        
+        document.getElementById('setup-max').innerText = maxPoison;
+        
+        // Şişe verilerini oluştur
+        bottlesData = [];
+        for(let i = 0; i < totalBottles; i++) {
+            bottlesData.push({ id: i, isPoisoned: false, isSolved: false });
+        }
+
+        renderSetupBottles();
+
+        document.getElementById('start-frame').classList.remove('active-screen');
+        document.getElementById('setup-frame').classList.add('active-screen');
+    }
+
+    // Kurulum Ekranındaki Şişeleri Çiz
+    function renderSetupBottles() {
+        const grid = document.getElementById('setup-bottles');
+        grid.innerHTML = "";
+        
+        bottlesData.forEach(bottle => {
+            let btn = document.createElement("div");
+            btn.className = "bottle" + (bottle.isPoisoned ? " poisoned-setup" : "");
+            
+            btn.onclick = () => {
+                // Eğer şişe zaten zehirliyse zehri al
+                if (bottle.isPoisoned) {
+                    bottle.isPoisoned = false;
+                    currentPoisonCount--;
+                } 
+                // Eğer şişe temizse ve maksimum limite ulaşılmadıysa zehirle
+                else if (currentPoisonCount < maxPoison) {
+                    bottle.isPoisoned = true;
+                    currentPoisonCount++;
+                }
+                
+                document.getElementById('setup-counter').innerText = currentPoisonCount;
+                
+                // Confirm butonunu aktif/pasif yap (Roblox'taki return kontrolü)
+                document.getElementById('confirm-btn').disabled = (currentPoisonCount !== maxPoison);
+                
+                renderSetupBottles(); // Ekranı güncelle
+            };
+            grid.appendChild(btn);
+        });
+    }
+
+    // --- 3. OYNANIŞ AŞAMASINA GEÇİŞ ---
+    function confirmSetup() {
+        document.getElementById('setup-frame').classList.remove('active-screen');
+        document.getElementById('play-frame').classList.add('active-screen');
+        renderPlayBottles();
+    }
+
+    // Oynanış Ekranındaki Şişeleri Çiz
+    function renderPlayBottles() {
+        const grid = document.getElementById('play-bottles');
+        grid.innerHTML = "";
+        
+        let remainingPoison = bottlesData.filter(b => b.isPoisoned && !b.isSolved).length;
+        if (remainingPoison === 0) {
+            document.getElementById('win-frame').style.display = 'flex';
+            return;
+        }
+
+        bottlesData.forEach(bottle => {
+            let btn = document.createElement("div");
+            // Roblox'taki gibi şişeler ilk başta kırmızı (normal) görünür. Çözülenler mavi(safe) olur.
+            btn.className = "bottle" + (bottle.isSolved ? " safe" : "");
+            
+            btn.onclick = () => {
+                if (bottle.isSolved) return; // Çözülmüşe bir daha tıklanmasın
+
+                if (bottle.isPoisoned) {
+                    // Zehirliyse Soru Sor
+                    bottle.isSolved = true; // Doğru bilirse çözülmüş sayılacak
+                    generateQuestion();
+                } else {
+                    // Zehirli değilse sadece güvenli olduğunu göster
+                    bottle.isSolved = true;
+                    renderPlayBottles();
+                }
+            };
+            grid.appendChild(btn);
+        });
+    }
+
+    // --- MATEMATİK SORUSU MANTIĞI (ÖNCEKİ KOD) ---
     function getRandomQuestion() {
         const type = Math.floor(Math.random() * 4) + 1;
-        let qText = "";
-        let corAns = 0;
+        let qText = "", corAns = 0;
 
         if (type === 1) {
             let acilis = Math.floor(Math.random() * 11) + 15;
@@ -71,7 +250,7 @@
 
     function startTimer() {
         clearInterval(timerInterval);
-        timeLeft = 60;
+        let timeLeft = gameTime; // Başlangıç menüsünden gelen süre
         document.getElementById("timer-text").innerText = timeLeft;
         timerInterval = setInterval(() => {
             timeLeft--;
@@ -84,10 +263,12 @@
 
     function gameOver() {
         clearInterval(timerInterval);
+        document.getElementById('question-frame').style.display = 'none';
         document.getElementById("lose-frame").style.display = "flex";
     }
 
     function generateQuestion() {
+        document.getElementById('question-frame').style.display = 'flex';
         const data = getRandomQuestion();
         currentCorrectAnswer = data.corAns;
         document.getElementById("question-text").innerText = data.qText;
@@ -108,7 +289,10 @@
             btn.innerText = val;
             btn.onclick = () => {
                 if (val === currentCorrectAnswer) {
-                    generateQuestion(); // Doğruysa yeni soruya geç
+                    // Doğru cevaplandı
+                    clearInterval(timerInterval);
+                    document.getElementById('question-frame').style.display = 'none';
+                    renderPlayBottles(); // Tahtayı güncelle (Eğer tüm zehirler bittiyse Win ekranı çıkar)
                 } else {
                     gameOver();
                 }
@@ -117,8 +301,6 @@
         });
         startTimer();
     }
-
-    generateQuestion();
 </script>
 
 </body>
