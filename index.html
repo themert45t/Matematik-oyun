@@ -196,7 +196,6 @@
     }
 
     function handlePlay(bottle, dataset) {
-        // Yeni Kural: Her takım sadece kendi panosuna basar!
         const isMyGrid = (currentTurn === 1 && dataset === t1Bottles) || (currentTurn === 2 && dataset === t2Bottles);
         
         if(!isMyGrid) {
@@ -207,7 +206,6 @@
         bottle.clicked = true;
 
         if(bottle.isPoison) {
-            // Zehirli şişe kalma kontrolü
             const rem = dataset.filter(x => x.isPoison && !x.clicked).length;
             if(rem === 0) endGame("Kendi panondaki son zehri buldun!");
             else showQuestion();
@@ -229,34 +227,88 @@
         document.getElementById('t2-sec').classList.toggle('active-team-border', currentTurn === 2);
     }
 
+    function rnd(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
     function showQuestion() {
         const qFrame = document.getElementById('question-frame');
         qFrame.style.display = 'flex';
         
         const qTypes = [
-            { t: (a,b) => `Bir mirket saatte ${a} kalori harcıyor. ${b} saat dans ederse kaç kalori yakar?`, f: (a,b) => a*b, r1:[10,40], r2:[2,9] },
-            { t: (a,b,c) => `Bir robot saniyede ${a} adım atıyor. ${b} saniye sonra ${c} adım geri kayarsa kaç adım ilerler?`, f:(a,b,c) => (a*b)-c, r1:[5,15], r2:[10,20], r3:[5,20]},
-            { t: (a,b,c) => `Uzay gemisi ${a} L yakıtla kalkıyor. Her km'de ${b} L ekleniyor. ${c} km sonra kaç L olur?`, f:(a,b,c) => a+(b*c), r1:[100,200], r2:[5,10], r3:[5,15]}
+            // Orijinal: Kalori hesabı
+            {
+                generate: () => {
+                    const a = rnd(10, 40), b = rnd(2, 9);
+                    const ans = a * b;
+                    return {
+                        text: `Bir mirket saatte ${a} kalori harcıyor. ${b} saat dans ederse kaç kalori yakar?`,
+                        answer: ans
+                    };
+                }
+            },
+            // Orijinal: Robot adım hesabı
+            {
+                generate: () => {
+                    const a = rnd(5, 15), b = rnd(10, 20), c = rnd(5, 20);
+                    const ans = (a * b) - c;
+                    return {
+                        text: `Bir robot saniyede ${a} adım atıyor. ${b} saniye sonra ${c} adım geri kayarsa kaç adım ilerler?`,
+                        answer: ans
+                    };
+                }
+            },
+            // Orijinal: Uzay gemisi yakıt hesabı
+            {
+                generate: () => {
+                    const a = rnd(100, 200), b = rnd(5, 10), c = rnd(5, 15);
+                    const ans = a + (b * c);
+                    return {
+                        text: `Uzay gemisi ${a} L yakıtla kalkıyor. Her km'de ${b} L ekleniyor. ${c} km sonra kaç L olur?`,
+                        answer: ans
+                    };
+                }
+            },
+            // YENİ: Dört büyük sayının toplamı (örnek: 502+852+592+582=?)
+            {
+                generate: () => {
+                    const a = rnd(101, 999), b = rnd(101, 999), c = rnd(101, 999), d = rnd(101, 999);
+                    const ans = a + b + c + d;
+                    return {
+                        text: `${a}+${b}+${c}+${d}=?`,
+                        answer: ans
+                    };
+                }
+            },
+            // YENİ: İki büyük sayı toplanıp üçüncüsü çıkarılıyor (örnek: 503+731-581=?)
+            {
+                generate: () => {
+                    const a = rnd(101, 999), b = rnd(101, 999), c = rnd(101, 999);
+                    const ans = a + b - c;
+                    return {
+                        text: `${a}+${b}-${c}=?`,
+                        answer: ans
+                    };
+                }
+            }
         ];
 
-        const s = qTypes[Math.floor(Math.random()*qTypes.length)];
-        const v1 = Math.floor(Math.random()*(s.r1[1]-s.r1[0]))+s.r1[0];
-        const v2 = Math.floor(Math.random()*(s.r2[1]-s.r2[0]))+s.r2[0];
-        const v3 = s.r3 ? Math.floor(Math.random()*(s.r3[1]-s.r3[0]))+s.r3[0] : 0;
-        
-        currentCorrectAnswer = s.f(v1, v2, v3);
-        document.getElementById('question-text').innerText = s.t(v1, v2, v3);
+        const s = qTypes[Math.floor(Math.random() * qTypes.length)];
+        const { text, answer } = s.generate();
+
+        currentCorrectAnswer = answer;
+        document.getElementById('question-text').innerText = text;
         
         let ch = [currentCorrectAnswer];
         while(ch.length < 4){
-            let r = currentCorrectAnswer + Math.floor(Math.random()*40)-20;
-            if(!ch.includes(r) && r > 0 && r < 1000) ch.push(r);
+            let r = currentCorrectAnswer + Math.floor(Math.random() * 40) - 20;
+            if(!ch.includes(r) && r !== currentCorrectAnswer) ch.push(r);
         }
-        ch.sort(()=>Math.random()-0.5);
+        ch.sort(() => Math.random() - 0.5);
 
         const cont = document.getElementById('options-container');
-        cont.innerHTML = "";
-        ch.forEach(c => {
+     u   cont.innerHTML = "";
+        ch.forEach(c => {ruejej
             const b = document.createElement('button');
             b.innerText = c;
             b.onclick = () => {
@@ -282,10 +334,9 @@
         clearInterval(timerInterval);
         document.getElementById('question-frame').style.display = 'none';
         document.getElementById('end-frame').style.display = 'flex';
-        // Kendi panosunda kaybeden elenir, diğer takım kazanır.
         const win = currentTurn === 1 ? "2. TAKIM" : "1. TAKIM";
         document.getElementById('end-subtitle').innerText = msg + " Kazanan: " + win;
     }
 </script>
 </body>
-</html>
+y
